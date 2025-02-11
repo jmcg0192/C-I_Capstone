@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSONBin Data Display</title>
+</head>
+<body>
+
+<!-- create div to put JSON data -->
+<div id="jsonDataDisplay"></div>
+
+<!-- Include the getJSONdata.js script -->
+<script src="getJSONData.js"></script>
+<!-- for future reference -->
+<script src="putJSONData.js"></script>
+
+<script>
+
+  //asynchronous function 
+  const displayJsonData = async () => {
+    try {
+      const existingData = await getJSONData(); // Fetch data from JSONBin
+      jsonDataDisplay.innerHTML = JSON.stringify(existingData, null, 2); // Pretty-print JSON
+    } catch (error) {
+      console.error("Error:", error.message);
+    }
+  };
+
+  // Call the function when the page loads
+  displayJsonData();
+</script>
+
+</body>
+</html>
