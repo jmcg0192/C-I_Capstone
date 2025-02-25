@@ -98,6 +98,7 @@
   <!-- External scripts -->
   <script src="getJSONData.js"></script>
   <script src="putJSONData.js"></script>
+  <script src="profile.js"></script>
 
 
   <script>
@@ -387,10 +388,37 @@
   }
 }
 
-    // Function to show user profile details.
-    function showUserProfile() {
-  window.location.href = "profile.html"; // Redirects to profile.html
+function showUserProfile() {
+  document.body.innerHTML = `
+    <div class="container mt-5">
+      <h1 class="text-center">Welcome, ${loggedInUser.Username}</h1>
+
+      <!-- Profile Image Upload -->
+      <div class="text-center">
+        <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Image">
+        <input type="file" id="imageUpload" class="form-control upload-btn" accept="image/*">
+        <button class="btn btn-primary upload-btn" onclick="uploadImage()">Upload Image</button>
+      </div>
+
+      <!-- User Song List -->
+      <div class="song-list">
+        <h3>Selected Songs</h3>
+        <ul id="songHistory"></ul>
+      </div>
+
+      <!-- Logout Button -->
+      <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
+    </div>
+  `;
+
+  loadProfileImage();
+  loadSongHistory();
 }
+
+function returnToSearch() {
+  location.reload(); // Reloads the page to restore the search UI
+}
+
 
     function verifyUser() {
   if (loggedInUser) {
