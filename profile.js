@@ -16,7 +16,7 @@ function showUserProfile() {
         <ul id="songHistory"></ul>
       </div>
 
-        <!-- Buttons -->
+      <!-- Buttons -->
       <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
       <button class="btn btn-secondary mt-3" onclick="returnToSearch()">Back to Search</button>
     </div>
