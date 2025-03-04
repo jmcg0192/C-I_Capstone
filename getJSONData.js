@@ -1,3 +1,5 @@
+// Does not need to be edited
+
 const getJSONData = async () => {
 	// Replace YOUR_BIN_ID with the actual ID of your bin
 	const binId = '67a2e9b0ad19ca34f8fa08de';

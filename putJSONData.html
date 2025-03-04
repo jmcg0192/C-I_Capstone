@@ -55,6 +55,7 @@
       <input type="text" id="albumSearchInput" class="form-control mb-2" placeholder="Enter album name">
       <input type="text" id="albumArtistInput" class="form-control mb-2" placeholder="Enter artist name (optional)">
       <button class="btn btn-primary w-100" onclick="searchAlbums()">Search Album</button>
+
       <div id="albumResults"></div>
     </div>
   </div>
@@ -62,6 +63,11 @@
   <!-- Submit Selected Song (Login Required) -->
   <h2 class="text-center mt-4">Submit Your Selected Song</h2>
   <button class="btn btn-success d-block mx-auto" onclick="attemptSubmit()">Submit Selected Song</button>
+  <div id="response" class="text-center mt-2"></div>
+
+  <!-- Submit Selected Album (Login Required) -->
+  <h2 class="text-center mt-4">Submit Your Selected Album</h2>
+  <button class="btn btn-success d-block mx-auto" onclick="attemptSubmitAlbum()">Submit Selected Album</button>
   <div id="response" class="text-center mt-2"></div>
 
   <!-- Login Modal -->
@@ -169,45 +175,54 @@
 
 
 
-    // Search for albums using the iTunes API with an optional artist field
-    async function searchAlbums() {
-      const albumQuery = document.getElementById('albumSearchInput').value;
-      const artistQuery = document.getElementById('albumArtistInput').value;
-      const resultsDiv = document.getElementById('albumResults');
+  // Search for albums using the iTunes API with an optional artist field
+  async function searchAlbums() {
+    const albumQuery = document.getElementById('albumSearchInput').value;
+    const artistQuery = document.getElementById('albumArtistInput').value;
+    const resultsDiv = document.getElementById('albumResults');
 
-      if (!albumQuery) {
-        alert('Please enter an album name!');
-        return;
-      }
-      
-      let query = encodeURIComponent(albumQuery);
-      if (artistQuery) {
-        query += '+' + encodeURIComponent(artistQuery);
-      }
-      
-      resultsDiv.innerHTML = '<p>Loading...</p>';
-      try {
-        const response = await fetch(`https://itunes.apple.com/search?term=${query}&limit=5&entity=album`);
-        const data = await response.json();
-        resultsDiv.innerHTML = data.results.length === 0 ? '<p>No albums found.</p>' : '';
-        data.results.forEach(album => {
-          resultsDiv.innerHTML += `
-            <div class="album">
-              <h3>${album.collectionName} - ${album.artistName}</h3>
-              <img src="${album.artworkUrl100}" alt="Album Cover">
-              <br>
-              <button id="toggle-songs-btn-${album.collectionId}" class="btn btn-sm btn-outline-primary"
-                onclick="fetchAlbumTracks('${album.collectionId}', '${album.collectionName}', '${album.artistName}', '${album.artworkUrl100}')">
-                View Songs
-              </button>
-              <div id="songs-${album.collectionId}" style="display: none;"></div>
-            </div>`;
-        });
-      } catch (error) {
-        resultsDiv.innerHTML = '<p>Error fetching albums.</p>';
-        console.error(error);
-      }
+    if (!albumQuery) {
+      alert('Please enter an album name!');
+      return;
     }
+
+    let query = encodeURIComponent(albumQuery);
+    if (artistQuery) {
+      query += '+' + encodeURIComponent(artistQuery);
+    }
+
+    resultsDiv.innerHTML = '<p>Loading...</p>';
+    
+    try {
+      const response = await fetch(`https://itunes.apple.com/search?term=${query}&limit=5&entity=album`);
+      const data = await response.json();
+
+      resultsDiv.innerHTML = data.results.length === 0 ? '<p>No albums found.</p>' : '';
+
+      data.results.forEach(album => {
+        resultsDiv.innerHTML += `
+          <div class="album">
+            <h3>${album.collectionName} - ${album.artistName}</h3>
+            <img src="${album.artworkUrl100}" alt="Album Cover">
+            <br>
+            <button id="toggle-songs-btn-${album.collectionId}" class="btn btn-sm btn-outline-primary"
+              onclick="fetchAlbumTracks('${album.collectionId}', '${album.collectionName}', '${album.artistName}', '${album.artworkUrl100}')">
+              View Songs
+            </button>
+            <div id="songs-${album.collectionId}" style="display: none;"></div>
+            <button class="btn btn-sm btn-outline-primary"
+              onclick="selectAlbum('${album.artistName}', '${album.artworkUrl100}', '${album.collectionName}', '${album.primaryGenreName}')">
+              Select Album
+            </button>
+          </div>
+        `;
+      });
+    } catch (error) {
+      resultsDiv.innerHTML = '<p>Error fetching albums.</p>';
+      console.error(error);
+    }
+}
+
 
     // Fetch tracks for a specific album and allow toggling the view; songs are playable.
     async function fetchAlbumTracks(albumId, albumName, artistName, albumArt) {
@@ -252,61 +267,120 @@
 
     // Save the selected song and notify the user.
     function selectSong(artist, track, albumArt ,album, genre) {
-  selectedSong = {
-    artist,
-    track,
-    genre,
-    albumArt,
-    album,
- //   rating,
-  };
-      alert(`Selected: ${track} by ${artist}`);
+      selectedSong = {
+        artist,
+        track,
+        genre,
+        albumArt,
+        album,
+  //   rating,
+      };
+    alert(`Selected: ${track} by ${artist}`);
     }
 
-    // Attempt to submit the selected song; if not logged in, prompt login modal.
-    async function attemptSubmit() {
-  if (!selectedSong) {
-    alert("You must select a song before submitting!");
-    return;
-  }
+    //save the selected album and notify the user
+    function selectAlbum(artist, albumArt, album, genre) {
+      selectedAlbum = {
+        artist,
+        genre,
+        albumArt,
+        album,
+      //rating
+      };
+      alert(`Selected: ${album} by ${artist}`)
+    }
 
-  if (!loggedInUser) {
-    alert("You must log in before submitting!");
-    openLoginModal();
-    return;
-  }
-
-  try {
-    const data = await getJSONData();  // Get existing data from JSONBin
-    let users = JSON.parse(data);
-
-    // Find the logged-in user
-    let userIndex = users.findIndex(user => user.Username === loggedInUser.Username);
-
-    if (userIndex === -1) {
-      alert("User not found. Please log in again.");
+  // Attempt to submit the selected song; if not logged in, prompt login modal.
+  async function attemptSubmit() {
+    if (!selectedSong) {
+      alert("You must select a song before submitting!");
       return;
     }
 
-    // Ensure the user has a "selectedSongs" array
-    if (!users[userIndex].selectedSongs) {
-      users[userIndex].selectedSongs = [];
+    if (!loggedInUser) {
+      alert("You must log in before submitting!");
+      openLoginModal();
+      return;
     }
 
-    // Prevent duplicate song entries
-    const songExists = users[userIndex].selectedSongs.some(song => song.track === selectedSong.track);
-    if (!songExists) {
-      users[userIndex].selectedSongs.push(selectedSong);
-      await putJSONData(users);  // Save updated data to JSONBin **without deleting everything**
-      alert("Song submitted successfully!");
-    } else {
-      alert("This song has already been added.");
+    try {
+      const data = await getJSONData();  // Get existing data from JSONBin
+      let users = JSON.parse(data);
+
+      // Find the logged-in user
+      let userIndex = users.findIndex(user => user.Username === loggedInUser.Username);
+
+      if (userIndex === -1) {
+        alert("User not found. Please log in again.");
+        return;
+      }
+
+      // Ensure the user has a "selectedSongs" array
+      if (!users[userIndex].selectedSongs) {
+        users[userIndex].selectedSongs = [];
+      }
+
+      // Prevent duplicate song entries
+      const songExists = users[userIndex].selectedSongs.some(song => song.track === selectedSong.track);
+      if (!songExists) {
+        users[userIndex].selectedSongs.push(selectedSong);
+        await putJSONData(users);  // Save updated data to JSONBin **without deleting everything**
+        alert("Song submitted successfully!");
+      } else {
+        alert("This song has already been added.");
+      }
+    } catch (error) {
+      console.error("Error saving song:", error);
+      alert("An error occurred while submitting the song.");
     }
-  } catch (error) {
-    console.error("Error saving song:", error);
-    alert("An error occurred while submitting the song.");
-  }
 }
+
+// Attempt to submit the selected album; if not logged in, prompt login modal.
+async function attemptSubmitAlbum() {
+    if (!selectedAlbum) {
+        alert("You must select an album before submitting!");
+        return;
+    }
+
+    if (!loggedInUser) {
+        alert("You must log in before submitting!");
+        openLoginModal();
+        return;
+    }
+
+    try {
+        const data = await getJSONData();  // Get existing data from JSONBin
+        let users = JSON.parse(data);
+
+        // Find the logged-in user
+        let userIndex = users.findIndex(user => user.Username === loggedInUser.Username);
+
+        if (userIndex === -1) {
+            alert("User not found. Please log in again.");
+            return;
+        }
+
+        // Ensure the user has a "selectedAlbums" array
+        if (!users[userIndex].selectedAlbums) {
+            users[userIndex].selectedAlbums = [];
+        }
+
+        // Prevent duplicate album entries
+        const albumExists = users[userIndex].selectedAlbums.some(album => album.album === selectedAlbum.album);
+
+        if (!albumExists) {
+            users[userIndex].selectedAlbums.push(selectedAlbum);
+            await putJSONData(users);  // Save updated data to JSONBin **without deleting everything**
+            alert(`Album "${selectedAlbum.album}" submitted successfully!`);
+        } else {
+            alert("This album has already been added.");
+        }
+    } catch (error) {
+        console.error("Error saving album:", error);
+        alert("An error occurred while submitting the album.");
+    }
+}
+
 
 // Open login modal and reset to show the login form
     function openLoginModal() {
@@ -325,8 +399,8 @@
 
 
 
-    // Login function: uses Username and Password; if not found, prompts signup.
-    async function login() {
+// Login function: uses Username and Password; if not found, prompts signup.
+async function login() {
   const username = document.getElementById('loginUsername').value;
   const password = document.getElementById('loginPassword').value;
   
@@ -354,8 +428,8 @@
   }
 }
     
-    // Create a new account using Username, Password, and Email.
-  async function createAccount() {
+// Create a new account using Username, Password, and Email.
+async function createAccount() {
   const newUsername = document.getElementById('newUsername').value;
   const newPassword = document.getElementById('newPassword').value;
   const email = document.getElementById('email').value;
@@ -406,8 +480,9 @@ function showUserProfile() {
         <ul id="songHistory"></ul>
       </div>
 
-      <!-- Logout Button -->
+      <!-- Logout Button and Back to Search Button -->
       <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
+      <button class="btn btn-secondary mt-3" onclick="returnToSearch()">Back to Search</button>
     </div>
   `;
 
