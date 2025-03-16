@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>User Profile</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body { font-family: 'Roboto', sans-serif; padding: 20px; }
+    .container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+    .profile-image { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 2px solid #333; margin-bottom: 10px; }
+    .upload-btn { margin-top: 10px; }
+    .song-list { text-align: left; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Welcome, <span id="usernameDisplay"></span></h2>
+
+    <!-- Profile Image Upload -->
+    <div>
+      <img id="profileImage" class="profile-image" src="default-avatar.png" alt="Profile Image">
+      <input type="file" id="imageUpload" class="form-control upload-btn" accept="image/*">
+      <button class="btn btn-primary upload-btn" onclick="uploadImage()">Upload Image</button>
+    </div>
+
+    <!-- User Song List -->
+    <div class="song-list">
+      <h3>Selected Songs</h3>
+      <ul id="songHistory"></ul>
+    </div>
+
+    <div class="album-list">
+        <h3>Selected Albums</h3>
+        <ul id="albumHistory"></ul>
+      </div>
+      
+
+    <!-- Logout and Return Buttons -->
+    <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
+    <button class="btn btn-secondary mt-3" onclick="returnToSearch()">Back to Search</button>
+  </div>
+
+  <script src="getJSONData.js"></script>
+
+  <script>
+    // Retrieve logged-in user from session storage
+    let loggedInUser = sessionStorage.getItem('loggedInUser') ? JSON.parse(sessionStorage.getItem('loggedInUser')) : null;
+
+    if (!loggedInUser) {
+      alert("No user logged in. Redirecting to login...");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("usernameDisplay").textContent = loggedInUser.Username;
+      loadProfileImage();
+      loadSongHistory();
+      loadAlbumHistory();
+    }
+
+    // Upload and save profile image
+    function uploadImage() {
+      const fileInput = document.getElementById("imageUpload");
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select an image.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById("profileImage").src = e.target.result;
+        localStorage.setItem(`profileImage-${loggedInUser.Username}`, e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Load the saved profile image
+    function loadProfileImage() {
+      const savedImage = localStorage.getItem(`profileImage-${loggedInUser.Username}`);
+      if (savedImage) {
+        document.getElementById("profileImage").src = savedImage;
+      }
+    }
+
+    // Load selected songs from JSONBin
+    async function loadSongHistory() {
+      try {
+        const data = await getJSONData();
+        let users = JSON.parse(data);
+        let user = users.find(u => u.Username === loggedInUser.Username);
+
+        const songList = document.getElementById("songHistory");
+        songList.innerHTML = "";
+
+        if (user && user.selectedSongs && user.selectedSongs.length > 0) {
+          user.selectedSongs.forEach(song => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `<strong>${song.track}</strong> - ${song.artist}`;
+            songList.appendChild(listItem);
+          });
+        } else {
+          songList.innerHTML = "<p>No songs selected yet.</p>";
+        }
+      } catch (error) {
+        console.error("Error loading song history:", error);
+      }
+    }
+    async function loadAlbumHistory() {
+      try {
+        const data = await getJSONData();
+        let users = JSON.parse(data);
+        let user = users.find(u => u.Username === loggedInUser.Username);
+
+        const albumList = document.getElementById("albumHistory");
+        albumList.innerHTML = "";
+
+        if (user && user.selectedAlbums && user.selectedAlbums.length > 0) {
+          user.selectedAlbums.forEach(album => {
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `<strong>${album.album}</strong> - ${album.artist}`;
+            albumList.appendChild(listItem);
+          });
+        } else {
+          albumList.innerHTML = "<p>No albums selected yet.</p>";
+        }
+      } catch (error) {
+        console.error("Error loading album history:", error);
+      }
+    }
+
+    function returnToSearch() {
+      window.location.href = "songSearch.html";
+    }
+
+
+    // Logout function
+    function logout() {
+      sessionStorage.removeItem("loggedInUser"); // Remove from session storage
+      alert("Logged out successfully.");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
