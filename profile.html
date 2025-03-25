@@ -8,10 +8,14 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body { font-family: 'Roboto', sans-serif; padding: 20px; }
-    .container { max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+    .container { max-width: 800px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
     .profile-image { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 2px solid #333; margin-bottom: 10px; }
     .upload-btn { margin-top: 10px; }
     .song-list { text-align: left; margin-top: 20px; }
+    .delete-btn { color: red; cursor: pointer; margin-left: 10px; }
+    .user-search { margin: 20px 0; padding: 20px; border: 1px solid #eee; border-radius: 5px; background-color: #f9f9f9; }
+    .search-results { max-height: 300px; overflow-y: auto; margin-top: 15px; }
+    .tab-content { margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -25,17 +29,48 @@
       <button class="btn btn-primary upload-btn" onclick="uploadImage()">Upload Image</button>
     </div>
 
-    <!-- User Song List -->
-    <div class="song-list">
-      <h3>Selected Songs</h3>
-      <ul id="songHistory"></ul>
+    <!-- User Search Section -->
+    <div class="user-search">
+      <h3>Find Other Users' Playlists</h3>
+      <div class="input-group mb-3">
+        <input type="text" id="userSearchInput" class="form-control" placeholder="Enter username">
+        <button class="btn btn-outline-primary" onclick="searchUsers()">Search</button>
+      </div>
+      <div id="searchResults" class="search-results"></div>
     </div>
 
-    <div class="album-list">
-        <h3>Selected Albums</h3>
-        <ul id="albumHistory"></ul>
+    <!-- Tabs for My Playlists and Other User's Playlist -->
+    <ul class="nav nav-tabs" id="playlistTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="my-playlists-tab" data-bs-toggle="tab" data-bs-target="#my-playlists" type="button" role="tab" aria-controls="my-playlists" aria-selected="true">My Playlists</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="other-playlists-tab" data-bs-toggle="tab" data-bs-target="#other-playlists" type="button" role="tab" aria-controls="other-playlists" aria-selected="false">Other User's Playlist</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="playlistTabsContent">
+      <!-- My Playlists Tab -->
+      <div class="tab-pane fade show active" id="my-playlists" role="tabpanel" aria-labelledby="my-playlists-tab">
+        <!-- User Song List -->
+        <div class="song-list">
+          <h3>My Selected Songs</h3>
+          <ul id="songHistory"></ul>
+        </div>
+
+        <div class="album-list">
+          <h3>My Selected Albums</h3>
+          <ul id="albumHistory"></ul>
+        </div>
       </div>
-      
+
+      <!-- Other User's Playlist Tab -->
+      <div class="tab-pane fade" id="other-playlists" role="tabpanel" aria-labelledby="other-playlists-tab">
+        <div id="otherUserContent">
+          <h3>Select a user to view their playlists</h3>
+        </div>
+      </div>
+    </div>
 
     <!-- Logout and Return Buttons -->
     <button class="btn btn-danger mt-3" onclick="logout()">Logout</button>
@@ -47,6 +82,7 @@
   <script>
     // Retrieve logged-in user from session storage
     let loggedInUser = sessionStorage.getItem('loggedInUser') ? JSON.parse(sessionStorage.getItem('loggedInUser')) : null;
+    let allUsers = []; // Store all users for search functionality
 
     if (!loggedInUser) {
       alert("No user logged in. Redirecting to login...");
@@ -54,8 +90,19 @@
     } else {
       document.getElementById("usernameDisplay").textContent = loggedInUser.Username;
       loadProfileImage();
-      loadSongHistory();
-      loadAlbumHistory();
+      loadUserData();
+    }
+
+    // Load all user data and populate current user's playlists
+    async function loadUserData() {
+      try {
+        const data = await getJSONData();
+        allUsers = JSON.parse(data);
+        loadSongHistory();
+        loadAlbumHistory();
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      }
     }
 
     // Upload and save profile image
@@ -83,56 +130,200 @@
       }
     }
 
-    // Load selected songs from JSONBin
-    async function loadSongHistory() {
-      try {
-        const data = await getJSONData();
-        let users = JSON.parse(data);
-        let user = users.find(u => u.Username === loggedInUser.Username);
+    // Load selected songs from JSON data
+    function loadSongHistory() {
+      let user = allUsers.find(u => u.Username === loggedInUser.Username);
+      const songList = document.getElementById("songHistory");
+      songList.innerHTML = "";
 
-        const songList = document.getElementById("songHistory");
-        songList.innerHTML = "";
-
-        if (user && user.selectedSongs && user.selectedSongs.length > 0) {
-          user.selectedSongs.forEach(song => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `<strong>${song.track}</strong> - ${song.artist}`;
-            songList.appendChild(listItem);
-          });
-        } else {
-          songList.innerHTML = "<p>No songs selected yet.</p>";
-        }
-      } catch (error) {
-        console.error("Error loading song history:", error);
+      if (user && user.selectedSongs && user.selectedSongs.length > 0) {
+        user.selectedSongs.forEach((song, index) => {
+          const listItem = document.createElement("li");
+          listItem.innerHTML = `
+            <strong>${song.track}</strong> - ${song.artist}
+            <span class="delete-btn" onclick="deleteSong(${index})">🗑️</span>
+          `;
+          songList.appendChild(listItem);
+        });
+      } else {
+        songList.innerHTML = "<p>No songs selected yet.</p>";
       }
     }
-    async function loadAlbumHistory() {
+
+    // Load selected albums from JSON data
+    function loadAlbumHistory() {
+      let user = allUsers.find(u => u.Username === loggedInUser.Username);
+      const albumList = document.getElementById("albumHistory");
+      albumList.innerHTML = "";
+
+      if (user && user.selectedAlbums && user.selectedAlbums.length > 0) {
+        user.selectedAlbums.forEach((album, index) => {
+          const listItem = document.createElement("li");
+          listItem.innerHTML = `
+            <strong>${album.album}</strong> - ${album.artist}
+            <span class="delete-btn" onclick="deleteAlbum(${index})">🗑️</span>
+          `;
+          albumList.appendChild(listItem);
+        });
+      } else {
+        albumList.innerHTML = "<p>No albums selected yet.</p>";
+      }
+    }
+
+    // Delete a song from the user's selected songs
+    async function deleteSong(index) {
       try {
-        const data = await getJSONData();
-        let users = JSON.parse(data);
-        let user = users.find(u => u.Username === loggedInUser.Username);
-
-        const albumList = document.getElementById("albumHistory");
-        albumList.innerHTML = "";
-
-        if (user && user.selectedAlbums && user.selectedAlbums.length > 0) {
-          user.selectedAlbums.forEach(album => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `<strong>${album.album}</strong> - ${album.artist}`;
-            albumList.appendChild(listItem);
-          });
-        } else {
-          albumList.innerHTML = "<p>No albums selected yet.</p>";
+        // Find the current user in the data
+        let user = allUsers.find(u => u.Username === loggedInUser.Username);
+        
+        // Remove the song at the specified index
+        if (user && user.selectedSongs) {
+          user.selectedSongs.splice(index, 1);
+          
+          // Update the JSON data
+          await updateJSONData(allUsers);
+          
+          // Reload the song list to reflect changes
+          loadSongHistory();
         }
       } catch (error) {
-        console.error("Error loading album history:", error);
+        console.error("Error deleting song:", error);
+        alert("Failed to delete song. Please try again.");
+      }
+    }
+
+    // Delete an album from the user's selected albums
+    async function deleteAlbum(index) {
+      try {
+        // Find the current user in the data
+        let user = allUsers.find(u => u.Username === loggedInUser.Username);
+        
+        // Remove the album at the specified index
+        if (user && user.selectedAlbums) {
+          user.selectedAlbums.splice(index, 1);
+          
+          // Update the JSON data
+          await updateJSONData(allUsers);
+          
+          // Reload the album list to reflect changes
+          loadAlbumHistory();
+        }
+      } catch (error) {
+        console.error("Error deleting album:", error);
+        alert("Failed to delete album. Please try again.");
+      }
+    }
+
+    // Function to update the JSON data (You need to implement this based on your JSONBin update method)
+    async function updateJSONData(updatedUsers) {
+      try {
+        // This is a placeholder - you need to implement the actual update logic
+        // For example, using JSONBin's update API or another method to update your JSON storage
+        
+        // For demonstration purposes, we'll just log that an update would happen
+        console.log("Data update function called with:", updatedUsers);
+        
+        // This should be replaced with your actual implementation that updates the data
+        // Example: await putJSONData(updatedUsers);
+        
+        return true;
+      } catch (error) {
+        console.error("Error updating JSON data:", error);
+        throw error;
+      }
+    }
+
+    // Search for other users
+    function searchUsers() {
+      const searchTerm = document.getElementById("userSearchInput").value.trim().toLowerCase();
+      const searchResults = document.getElementById("searchResults");
+      searchResults.innerHTML = "";
+      
+      if (!searchTerm) {
+        searchResults.innerHTML = "<p>Please enter a username to search.</p>";
+        return;
+      }
+      
+      // Filter users based on search term
+      const filteredUsers = allUsers.filter(user => 
+        user.Username.toLowerCase().includes(searchTerm) && 
+        user.Username !== loggedInUser.Username
+      );
+      
+      if (filteredUsers.length > 0) {
+        const resultList = document.createElement("ul");
+        resultList.className = "list-group";
+        
+        filteredUsers.forEach(user => {
+          const userItem = document.createElement("li");
+          userItem.className = "list-group-item";
+          userItem.innerHTML = `
+            <strong>${user.Username}</strong>
+            <button class="btn btn-sm btn-outline-info float-end" onclick="viewUserPlaylists('${user.Username}')">
+              View Playlists
+            </button>
+          `;
+          resultList.appendChild(userItem);
+        });
+        
+        searchResults.appendChild(resultList);
+      } else {
+        searchResults.innerHTML = "<p>No users found matching that username.</p>";
+      }
+    }
+
+    // View another user's playlists
+    function viewUserPlaylists(username) {
+      const user = allUsers.find(u => u.Username === username);
+      const otherUserContent = document.getElementById("otherUserContent");
+      
+      if (user) {
+        // Switch to the other user's playlist tab
+        document.getElementById("other-playlists-tab").click();
+        
+        otherUserContent.innerHTML = `
+          <h3>${username}'s Playlists</h3>
+          
+          <div class="song-list">
+            <h4>Songs</h4>
+            <ul>${renderUserSongs(user)}</ul>
+          </div>
+          
+          <div class="album-list">
+            <h4>Albums</h4>
+            <ul>${renderUserAlbums(user)}</ul>
+          </div>
+        `;
+      } else {
+        otherUserContent.innerHTML = "<p>User not found.</p>";
+      }
+    }
+
+    // Render a user's songs as HTML
+    function renderUserSongs(user) {
+      if (user.selectedSongs && user.selectedSongs.length > 0) {
+        return user.selectedSongs.map(song => 
+          `<li><strong>${song.track}</strong> - ${song.artist}</li>`
+        ).join('');
+      } else {
+        return "<p>No songs selected by this user.</p>";
+      }
+    }
+
+    // Render a user's albums as HTML
+    function renderUserAlbums(user) {
+      if (user.selectedAlbums && user.selectedAlbums.length > 0) {
+        return user.selectedAlbums.map(album => 
+          `<li><strong>${album.album}</strong> - ${album.artist}</li>`
+        ).join('');
+      } else {
+        return "<p>No albums selected by this user.</p>";
       }
     }
 
     function returnToSearch() {
       window.location.href = "songSearch.html";
     }
-
 
     // Logout function
     function logout() {

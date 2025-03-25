@@ -39,7 +39,7 @@
         if (loggedInUser) {
           alert("Login Successful");
           sessionStorage.setItem('loggedInUser', JSON.stringify(loggedInUser)); // Store user session
-          window.location.href = 'songSearch.html'; // Redirect
+          window.location.href = 'recommendation.html'; // Redirect
         } else {
           document.getElementById('loginErrorMessage').textContent = "Username/Password is incorrect.";
           document.getElementById('loginErrorMessage').style.display = 'block';

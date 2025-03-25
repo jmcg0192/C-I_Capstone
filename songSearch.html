@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- External CSS -->
@@ -62,6 +64,19 @@
   .btn-outline-success:hover {
     background-color: #28a745;
     color: #fff;
+  }
+
+  /* Navigation Menu */
+  .nav-menu {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+  }
+
+  .nav-menu .btn {
+    padding: 8px 16px;
+    border-radius: 5px;
   }
 
   /* Toggle Buttons for Search Mode */
@@ -208,7 +223,11 @@
 <body>
 <div id="userArea" class="position-absolute top-0 end-0 m-3"></div>
 
-
+  <!-- Navigation Menu -->
+  <div class="nav-menu">
+    <button class="btn btn-info" onclick="window.location.href='recommendation.html'">Get Recommendations</button>
+    <button class="btn btn-secondary" onclick="window.location.href='profile.html'">Profile</button>
+  </div>
 
   <!-- Toggle for Search Mode -->
   <div class="toggle-container">
@@ -295,6 +314,57 @@
     });
 
 
+
+
+// Add these variables and functions in the <script> section, before your existing JavaScript code
+  let rating = 0; // Global variable to store the current rating
+
+// Star rating HTML to be inserted where needed
+function getRatingHtml() {
+  return `
+    <div class="rating-container mb-2">
+      <span>Your Rating: </span>
+      <span id="star1" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(1)"></span>
+      <span id="star2" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(2)"></span>
+      <span id="star3" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(3)"></span>
+      <span id="star4" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(4)"></span>
+      <span id="star5" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(5)"></span>
+    </div>
+  `;
+}
+
+// Clean up and reset star ratings
+function cleanup() {
+  rating = 0;
+  for (var i = 1; i <= 5; i++) {
+    const starId = 'star' + i;
+    const star = document.getElementById(starId);
+    if (star) {
+      star.style.color = "blue";
+    }
+  }
+}
+
+// Set the star rating
+let songRatings = {}; // Store ratings for multiple songs
+
+function starRating(star, trackId) {
+    if (!trackId) {
+        console.error("Error: trackId is undefined in starRating()");
+        return;
+    }
+
+    songRatings[trackId] = star; // Store the rating for this specific song
+
+    for (let i = 1; i <= 5; i++) {
+        const starElem = document.getElementById(`star${i}-${trackId}`);
+        if (starElem) {
+            starElem.style.color = (i <= star) ? "gold" : "blue";
+        }
+    }
+}
+
+
     // Search for songs using the iTunes API
     async function searchSongs() {
   const songQuery = document.getElementById('songSearchInput').value.trim();
@@ -337,7 +407,19 @@
             <source src="${song.previewUrl}" type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
-          <button class="btn btn-sm btn-outline-primary" onclick="selectSong('${song.trackName}', '${song.artistName}', '${song.collectionName}', '${song.artworkUrl100}')">Select</button>
+          <br>
+                    <div class="rating-container">
+                        <span>Your Rating: </span>
+                        <span id="star1-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(1, '${song.trackId}')"></span>
+                        <span id="star2-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(2, '${song.trackId}')"></span>
+                        <span id="star3-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(3, '${song.trackId}')"></span>
+                        <span id="star4-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(4, '${song.trackId}')"></span>
+                        <span id="star5-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(5, '${song.trackId}')"></span>
+                    </div>
+<button class="btn btn-sm btn-outline-primary" 
+    onclick="selectSong('${song.trackName}', '${song.artistName}', '${song.collectionName}', '${song.artworkUrl100}', '${song.trackId}')">
+    Select
+</button>
         </div>`;
     });
   } catch (error) {
@@ -374,21 +456,27 @@
 
       data.results.forEach(album => {
         resultsDiv.innerHTML += `
-          <div class="album">
-            <h3>${album.collectionName} - ${album.artistName}</h3>
-            <img src="${album.artworkUrl100}" alt="Album Cover">
-            <br>
-            <button id="toggle-songs-btn-${album.collectionId}" class="btn btn-sm btn-outline-primary"
-              onclick="fetchAlbumTracks('${album.collectionId}', '${album.collectionName}', '${album.artistName}', '${album.artworkUrl100}')">
-              View Songs
-            </button>
-            <div id="songs-${album.collectionId}" style="display: none;"></div>
-            <button class="btn btn-sm btn-outline-primary"
-              onclick="selectAlbum('${album.artistName}', '${album.artworkUrl100}', '${album.collectionName}', '${album.primaryGenreName}')">
-              Select Album
-            </button>
-          </div>
-        `;
+    <div class="song">
+        <p><strong>${song.trackName}</strong> - ${song.artistName}</p>
+        <audio controls>
+            <source src="${song.previewUrl}" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <br>
+        <div class="rating-container">
+            <span>Your Rating: </span>
+            <span id="star1-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(1, '${song.trackId}')"></span>
+            <span id="star2-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(2, '${song.trackId}')"></span>
+            <span id="star3-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(3, '${song.trackId}')"></span>
+            <span id="star4-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(4, '${song.trackId}')"></span>
+            <span id="star5-${song.trackId}" class="fa fa-star" style="color:blue; cursor:pointer;" onclick="starRating(5, '${song.trackId}')"></span>
+        </div>
+        <button class="btn btn-sm btn-outline-primary" 
+            onclick="selectSong('${song.trackName}', '${song.artistName}', '${song.collectionName}', '${song.artworkUrl100}', '${song.trackId}')">
+            Select
+        </button>
+    </div>`;
+
       });
     } catch (error) {
       resultsDiv.innerHTML = '<p>Error fetching albums.</p>';
@@ -439,29 +527,39 @@
     }
 
     // Save the selected song and notify the user.
-    function selectSong(artist, track, albumArt ,album, genre) {
-      selectedSong = {
-        artist,
-        track,
-        genre,
-        albumArt,
-        album,
-  //   rating,
-      };
-    alert(`Selected: ${track} by ${artist}`);
+    function selectSong(track, artist, album, albumArt, trackId) {
+    if (!trackId) {
+        alert("Error: trackId is missing!");
+        return;
     }
+
+    const songRating = songRatings[trackId] || 0; // Retrieve the rating for this specific song
+
+    selectedSong = {
+        track,
+        artist,
+        album,
+        albumArt,
+        rating: songRating,  // Store the selected rating
+        trackId
+    };
+
+    alert(`Selected: ${track} by ${artist} with rating: ${songRating}/5`);
+}
+
+
 
     //save the selected album and notify the user
     function selectAlbum(artist, albumArt, album, genre) {
-      selectedAlbum = {
+    selectedAlbum = {
         artist,
-        genre,
-        albumArt,
         album,
-      //rating
-      };
-      alert(`Selected: ${album} by ${artist}`)
-    }
+        albumArt,
+        genre,
+        rating: rating  // Store the rating when the album is selected
+    };
+    alert(`Selected: ${album} by ${artist} with rating: ${rating}/5`);
+}
 
   // Attempt to submit the selected song; if not logged in, prompt login modal.
   async function attemptSubmit() {
@@ -557,7 +655,6 @@ async function attemptSubmitAlbum() {
 
 function showUserProfile() {
  
-
   loadProfileImage();
   loadSongHistory();
   loadAlbumHistory()

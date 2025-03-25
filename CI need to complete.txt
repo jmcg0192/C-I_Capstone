@@ -1,0 +1,72 @@
+
+  [
+  {
+    "Username": "gaga",
+    "Password": "agag",
+    "Email": "ag@g.com",
+    "Role": "user",
+    "SubmittedSongs": [
+      {
+        "track": "Shape of You",
+        "artist": "Ed Sheeran",
+        "album": "Divide",
+        "genre": "Pop",
+        "composer": "Ed Sheeran",
+        "rating": "Not Rated",
+        "albumArt": "https://link-to-album-art.com/shapeofyou.jpg"
+      }
+    ]
+  },
+  {
+    "Username": "drewbeans",
+    "Password": "wackman",
+    "Email": "drewbeans@gmail.com",
+    "Role": "admin",
+    "SubmittedSongs": []
+  },
+  {
+    "Username": "jp",
+    "Password": "123456",
+    "Email": "pricej14@students.rowan.edu",
+    "Role": "admin",
+    "SubmittedSongs": []
+  },
+  {
+    "Username": "AngryLizardReviews",
+    "Password": "DoingYourMom69",
+    "Email": "StupidHead@gmail.com",
+    "Role": "user",
+    "SubmittedSongs": []
+  },
+  {
+    "Username": "ShitTalkerDripWalker",
+    "Password": "yark",
+    "Email": "blicky@bigfellas.com",
+    "Role": "user",
+    "SubmittedSongs": []
+  },
+  {
+    "Username": "test",
+    "Password": "test",
+    "Email": "test@test.com",
+    "Role": "admin",
+    "SubmittedSongs": []
+  }
+]
+
+
+
+need to add user rateing system 
+maybe add user comments section (bonus)
+needed to be able to delete song/playlist out of database (all accounts users and admins 
+needed to be able to share with other users in the database  (maybe add searchbar to find by users in the database and pull up there profiles)
+
+add choice to add whole albums
+store it in profiles
+add back to search in profiles
+ add rate the song in profiles
+ add comments i
+show rating in profile, delete song from playlist from database, add rating to albums
+ 
+ 
+ ADD BY ALBUM FIX IT UP/ 
