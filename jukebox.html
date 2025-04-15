@@ -1,21 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In / Sign Up</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jukeboxd - Sign In / Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #0f0f0f;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .top-bar {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(to right, #1c1c1c, #292929);
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      width: 90%;
+      max-width: 600px;
+    }
+
+    .top-bar h1 {
+      margin-bottom: 1.5rem;
+      font-size: 2.2rem;
+      font-weight: 800;
+    }
+
+    #userArea {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #fff;
+      background: transparent;
+      color: #fff;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #1db954;
+      border-color: #1db954;
+      color: #000;
+    }
+
+    .btn-outline-primary:hover {
+      background: #1e90ff;
+      border-color: #1e90ff;
+      color: #fff;
+    }
+
+    .btn-outline-success:hover {
+      background: #28a745;
+      border-color: #28a745;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
-    <!-- Top Bar with User Profile / Login Button -->
-    <div class="top-bar">
-        <h1>Search for a Song or Album</h1>
-        <div id="userArea">
-            <a href="login.html" id="loginButton" class="btn btn-outline-primary">Login Here</a>
-            <a href="signup.html" id="signUpButton" class="btn btn-outline-success" >Sign Up</a>
-        </div>
+  <!-- Top Bar with User Profile / Login Button -->
+  <div class="top-bar">
+    <h1>Jukeboxd</h1>
+    <div id="userArea">
+      <a href="login.html" id="loginButton" class="btn btn-outline-primary">Login</a>
+      <a href="signup.html" id="signUpButton" class="btn btn-outline-success">Sign Up</a>
     </div>
-    
-    <script src="script.js"></script>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
