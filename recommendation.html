@@ -1,1309 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Music Recommendations</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <style>
-        /* Global Styles */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f4f6f9;
-            padding: 20px;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            border-radius: 8px;
-        }
-
-        .section-title {
-            color: #343a40;
-            font-weight: 600;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .card {
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-        }
-
-            .card:hover {
-                transform: translateY(-5px);
-            }
-
-        .card-img-top {
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .card-body {
-            padding: 15px;
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-
-            .btn-primary:hover {
-                background-color: #0056b3;
-            }
-
-        .recommendation-section {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav-tabs {
-            margin-bottom: 20px;
-            border-bottom: 2px solid #dee2e6;
-        }
-
-            .nav-tabs .nav-link {
-                border: none;
-                color: #6c757d;
-                font-weight: 500;
-                padding: 10px 15px;
-            }
-
-                .nav-tabs .nav-link.active {
-                    color: #007bff;
-                    background-color: transparent;
-                    border-bottom: 2px solid #007bff;
-                }
-
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #007bff;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        #userArea {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
-        .pagination-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-            gap: 10px;
-        }
-
-        .sub-section {
-            margin-bottom: 30px;
-        }
-
-        .sub-section-title {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: #343a40;
-            font-weight: 500;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recommendations - Jukeboxd</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #121212; color: #f1f1f1; font-family: 'Roboto', sans-serif; margin: 0; }
+    .navbar { background-color: #1f1f1f; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4); }
+    .navbar-brand { font-size: 1.5rem; font-weight: bold; color: #00b894; }
+    .navbar-nav .nav-link { color: #ccc; margin-right: 1rem; }
+    .navbar-nav .nav-link:hover { color: #fff; }
+    .container { margin-top: 2rem; }
+    .tab-content { margin-top: 2rem; }
+    .section-title { text-align: center; margin-bottom: 2rem; font-weight: bold; color: #00b894; }
+    .card { background-color: #1f1f1f; border: none; border-radius: 10px; overflow: hidden; transition: transform 0.3s; }
+    .card-body {
+      color: #ffffff; }
+    .card:hover { transform: scale(1.05); }
+    .card-img-top { height: 200px; object-fit: cover; }
+    .btn-primary { background-color: #00b894; border: none; }
+    .btn-primary:hover { background-color: #019670; }
+    .nav-tabs .nav-link { background: transparent; border: none; color: #ccc; }
+    .nav-tabs .nav-link.active { color: #00b894; border-bottom: 2px solid #00b894; }
+    .recommendation-section { padding: 20px; }
+    .loader { border: 5px solid #f3f3f3; border-radius: 50%; border-top: 5px solid #00b894; width: 40px; height: 40px; animation: spin 2s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
 
-    <!-- User profile area (top right corner) -->
-    <div id="userArea"></div>
-
-    <div class="container">
-        <div class="top-bar">
-            <h1>Your Music Recommendations</h1>
-            <div>
-                <button class="btn btn-outline-primary me-2" onclick="window.location.href='songSearch.html'">Back to Search</button>
-                <button class="btn btn-outline-success" onclick="window.location.href='profile.html'">View Profile</button>
-            </div>
-        </div>
-
-        <div class="recommendation-section">
-            <ul class="nav nav-tabs" id="recommendationTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="personalized-tab" data-bs-toggle="tab" data-bs-target="#personalized" type="button" role="tab">
-                        Personalized Recommendations
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="trending-tab" data-bs-toggle="tab" data-bs-target="#trending" type="button" role="tab">
-                        Trending Now
-                    </button>
-                </li>
-                
-<li class="nav-item" role="presentation">
-  <button class="nav-link" id="discover-tab" data-bs-toggle="tab" data-bs-target="#discover" type="button" role="tab">
-    Discover New Music
-  </button>
-</li>
-</ul>
-
-            <div class="tab-content" id="recommendationTabContent">
-                <!-- Personalized Recommendations Tab -->
-                <div class="tab-pane fade show active" id="personalized" role="tabpanel">
-                    <h2 class="section-title">Based on Your Selections</h2>
-                    <div id="personalizedContent">
-                        <p class="text-center">Please log in to see personalized recommendations.</p>
-                    </div>
-                </div>
-
-                <!-- Trending Tab -->
-
-<!-- Discover Tab -->
-<div class="tab-pane fade" id="discover" role="tabpanel">
-  <h2 class="section-title">Discover By Genre</h2>
-  <div class="mb-4">
-    <select id="genreSelect" class="form-select">
-      <option value="all">All Genres</option>
-      <option value="pop">Pop</option>
-      <option value="rock">Rock</option>
-      <option value="hiphop">Hip Hop/Rap</option>
-      <option value="electronic">Electronic</option>
-      <option value="jazz">Jazz</option>
-      <option value="classical">Classical</option>
-      <option value="country">Country</option>
-      <option value="rnb">R&B/Soul</option>
-    </select>
-    <button class="btn btn-primary w-100 mt-2" onclick="discoverByGenre()">Discover</button>
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Jukeboxd</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
+        <li class="nav-item"><a class="nav-link" href="songsearch.html">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="jukebox.html">Logout</a></li>
+      </ul>
+    </div>
   </div>
-  <div class="row" id="discoverContent"></div>
-</div>
+</nav>
 
-                <div class="tab-pane fade" id="trending" role="tabpanel">
-                    <h2 class="section-title">What's Hot Right Now</h2>
+<div class="container recommendation-section">
+  <ul class="nav nav-tabs" id="recommendationTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="personalized-tab" data-bs-toggle="tab" data-bs-target="#personalized" type="button" role="tab">
+        Personalized Recommendations
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="trending-tab" data-bs-toggle="tab" data-bs-target="#trending" type="button" role="tab">
+        Trending Now
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="discover-tab" data-bs-toggle="tab" data-bs-target="#discover" type="button" role="tab">
+        Discover New Music
+      </button>
+    </li>
+  </ul>
 
-                    <!-- Top Songs Section -->
-                    <div class="sub-section">
-                        <h3 class="sub-section-title">Top Songs</h3>
-                        <div class="row" id="trendingSongsContent">
-                            <div class="loader"></div>
-                        </div>
-                        <div class="pagination-controls" id="songsPagination">
-                            <button class="btn btn-outline-primary" id="loadMoreSongs" onclick="loadMoreTrendingSongs()">Load 10 More</button>
-                        </div>
-                    </div>
-/*
-                    <!-- Top Albums Section 
-                    <div class="sub-section">
-                        <h3 class="sub-section-title">Top Albums</h3>
-                        <div class="row" id="trendingAlbumsContent">
-                            <div class="loader"></div>
-                        </div>
-                        <div class="pagination-controls" id="albumsPagination">
-                            <button class="btn btn-outline-primary" id="loadMoreAlbums" onclick="loadMoreTrendingAlbums()">Load 10 More</button>
-                        </div>
-                    </div>
-                </div>
-*/-->
-                
-            </div>
-        </div>
+  <div class="tab-content" id="recommendationTabContent">
+    <div class="tab-pane fade show active" id="personalized" role="tabpanel">
+      <h2 class="section-title">Based on Your Selections</h2>
+      <div id="personalizedContent">
+        <p class="text-center">Please log in to see personalized recommendations.</p>
+      </div>
     </div>
 
-    <!-- External scripts -->
-    <script src="getJSONData.js"></script>
-    <script src="putJSONData.js"></script>
-
-    <script>
-    // Global variables
-    let loggedInUser = null;
-    let selectedSong = null;
-    let selectedAlbum = null;
-    let trendingSongsPage = 1;
-    let trendingAlbumsPage = 1;
-    let trendingSongsData = [];
-    let trendingAlbumsData = [];
-    const itemsPerPage = 10;
-
-    // Check if user is logged in on page load
-    window.onload = async function() {
-      // Get logged in user from session storage
-      loggedInUser = sessionStorage.getItem('loggedInUser') ? JSON.parse(sessionStorage.getItem('loggedInUser')) : null;
-
-      // Update user area in the corner - Login and signup buttons removed
-      updateUserArea();
-
-
-    
-      // Load personalized recommendations if user is logged in
-      if (loggedInUser) {
-        loadPersonalizedRecommendations();
-      }
-    };
-
-    // Update user area based on login status (with login/signup buttons removed)
-    function updateUserArea() {
-      const userArea = document.getElementById('userArea');
-
-      if (loggedInUser) {
-        userArea.innerHTML = ``;
-      } else {
-        userArea.innerHTML = ``;
-      }
-    }
-
-    async function loadTrendingSongs() {
-  const trendingSongsDiv = document.getElementById('trendingSongsContent');
-  trendingSongsDiv.innerHTML = '<div class="loader"></div>';
-
-  try {
-    // Updated to iTunes Top 100 RSS feed
-    const response = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=100/json');
-    const data = await response.json();
-
-    if (!data.feed || !data.feed.entry) {
-      trendingSongsDiv.innerHTML = '<p class="text-center">Unable to load trending songs.</p>';
-      return;
-    }
-
-    // Store all songs data for pagination
-    trendingSongsData = data.feed.entry;
-
-    // Display the first page of songs
-    renderTrendingSongs(0, itemsPerPage);
-
-    // Update pagination controls
-    updateSongsPagination();
-  } catch (error) {
-    console.error('Error loading trending songs:', error);
-    trendingSongsDiv.innerHTML = '<p class="text-center">Error loading trending songs. Please try again later.</p>';
-  }
-}
-
-
-    /* Load trending albums work later
-    async function loadTrendingAlbums() {
-  const trendingAlbumsDiv = document.getElementById('trendingAlbumsContent');
-  trendingAlbumsDiv.innerHTML = '<div class="loader"></div>';
-
-  try {
-    const response = await fetch('https://rss.marketingtools.apple.com/api/v2/us/music/most-played/10/albums.json');
-    const data = await response.json();
-
-    if (!data.feed || !data.feed.results) {
-      trendingAlbumsDiv.innerHTML = '<p class="text-center">Unable to load trending albums.</p>';
-      return;
-    }
-
-    trendingAlbumsData = data.feed.results;
-
-    renderTrendingAlbums(0, itemsPerPage);
-    updateAlbumsPagination();
-  } catch (error) {
-    console.error('Error loading trending albums:', error);
-    trendingAlbumsDiv.innerHTML = '<p class="text-center">Error loading trending albums. Please try again later.</p>';
-  }
-}
-*/
-
-
-    
-
-    // Render trending albums based on pagination
-    function renderTrendingSongs(start, count) {
-  const trendingSongsDiv = document.getElementById('trendingSongsContent');
-  trendingSongsDiv.innerHTML = '';
-
-  const songsToShow = trendingSongsData.slice(start, start + count);
-
-  if (songsToShow.length === 0) {
-    trendingSongsDiv.innerHTML = '<p class="text-center">No songs available.</p>';
-    return;
-  }
-
-  let songsHTML = '';
-
-  songsToShow.forEach((item) => {
-    const title = item.title.label;
-    const artist = item['im:artist'].label;
-    const image = item['im:image'][2].label;
-    const genre = item.category.attributes.term;
-
-    songsHTML += `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          <img src="${image}" class="card-img-top" alt="${title}">
-          <div class="card-body">
-            <h5 class="card-title">${title}</h5>
-            <p class="card-text">Artist: ${artist}</p>
-            <p class="card-text">Genre: ${genre}</p>
-            <button class="btn btn-primary" onclick="searchAndPreview('${title.replace(/'/g, "\\'")}', '${artist.replace(/'/g, "\\'")}')">Listen Preview</button>
-          </div>
-        </div>
+    <div class="tab-pane fade" id="trending" role="tabpanel">
+      <h2 class="section-title">What's Hot Right Now</h2>
+      <div class="row" id="trendingSongsContent">
+        <div class="loader"></div>
       </div>
-    `;
-  });
-
-  trendingSongsDiv.innerHTML = songsHTML;
-}
-/*
-function renderTrendingAlbums(start, count) {
-  const trendingAlbumsDiv = document.getElementById('trendingAlbumsContent');
-  trendingAlbumsDiv.innerHTML = '';
-
-  const albumsToShow = trendingAlbumsData.slice(start, start + count);
-
-  if (albumsToShow.length === 0) {
-    trendingAlbumsDiv.innerHTML = '<p class="text-center">No albums available.</p>';
-    return;
-  }
-
-  let albumsHTML = '';
-
-  albumsToShow.forEach((item) => {
-    const title = item.name;
-    const artist = item.artistName;
-    const image = item.artworkUrl100;
-    const genre = item.genres[0]?.name || 'Unknown Genre';
-
-    albumsHTML += `
-      <div class="col-md-4 mb-4">
-        <div class="card h-100">
-          <img src="${image.replace('100x100', '300x300')}" class="card-img-top" alt="${title}">
-          <div class="card-body">
-            <h5 class="card-title">${title}</h5>
-            <p class="card-text">Artist: ${artist}</p>
-            <p class="card-text">Genre: ${genre}</p>
-            <button class="btn btn-primary" onclick="searchAlbumAndPreview('${title.replace(/'/g, "\\'")}', '${artist.replace(/'/g, "\\'")}')">View Album</button>
-          </div>
-        </div>
+      <div class="pagination-controls text-center mt-3" id="songsPagination">
+        <button class="btn btn-outline-primary" id="loadMoreSongs" onclick="loadMoreTrendingSongs()">Load 10 More</button>
       </div>
-    `;
-  });
-
-  trendingAlbumsDiv.innerHTML = albumsHTML;
-}
-
-*/
-
-    // Update pagination controls for songs
-    function updateSongsPagination() {
-      const paginationDiv = document.getElementById('songsPagination');
-      const loadMoreBtn = document.getElementById('loadMoreSongs');
-
-      if (trendingSongsData.length <= trendingSongsPage * itemsPerPage) {
-        loadMoreBtn.disabled = true;
-        loadMoreBtn.textContent = 'No More Songs';
-      } else {
-        loadMoreBtn.disabled = false;
-        loadMoreBtn.textContent = 'Load 10 More';
-      }
-    }
-/*
-    // Update pagination controls for albums
-    function updateAlbumsPagination() {
-      const paginationDiv = document.getElementById('albumsPagination');
-      const loadMoreBtn = document.getElementById('loadMoreAlbums');
-
-      if (trendingAlbumsData.length <= trendingAlbumsPage * itemsPerPage) {
-        loadMoreBtn.disabled = true;
-        loadMoreBtn.textContent = 'No More Albums';
-      } else {
-        loadMoreBtn.disabled = false;
-        loadMoreBtn.textContent = 'Load 10 More';
-      }
-    }
-*/
-    // Load more trending songs
-    async function loadMoreTrendingSongs() {
-      const loadMoreBtn = document.getElementById('loadMoreSongs');
-      loadMoreBtn.disabled = true;
-      loadMoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-
-      try {
-        // If we need more songs data, fetch the next batch
-        if (trendingSongsPage * itemsPerPage >= trendingSongsData.length) {
-          // Use Apple Music API to get more songs
-          const response = await fetch('https://rss.marketingtools.apple.com/api/v2/us/music/most-played/10/songs.json');
-          const data = await response.json();
-
-          if (data.feed && data.feed.results) {
-            // Add new songs to our collection, avoiding duplicates
-            const newSongs = data.feed.results.filter(newSong =>
-              !trendingSongsData.some(existingSong => existingSong.id === newSong.id)
-            );
-
-            trendingSongsData = [...trendingSongsData, ...newSongs];
-          }
-        }
-
-        // Increment page and render additional songs
-        trendingSongsPage++;
-        renderTrendingSongs(0, trendingSongsPage * itemsPerPage);
-
-        // Update pagination controls
-        updateSongsPagination();
-      } catch (error) {
-        console.error('Error loading more songs:', error);
-        loadMoreBtn.textContent = 'Error loading more songs';
-        setTimeout(() => {
-          loadMoreBtn.textContent = 'Try Again';
-          loadMoreBtn.disabled = false;
-        }, 2000);
-      }
-    }
-
-    /* Load more trending albums
-    async function loadMoreTrendingAlbums() {
-      const loadMoreBtn = document.getElementById('loadMoreAlbums');
-      loadMoreBtn.disabled = true;
-      loadMoreBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-
-      try {
-        // If we need more albums data, fetch the next batch
-        if (trendingAlbumsPage * itemsPerPage >= trendingAlbumsData.length) {
-          // Use Apple Music API to get more albums
-          const response = await fetch('https://rss.marketingtools.apple.com/api/v2/us/music/most-played/10/albums.json');
-          const data = await response.json();
-
-          if (data.feed && data.feed.results) {
-            // Add new albums to our collection, avoiding duplicates
-            const newAlbums = data.feed.results.filter(newAlbum =>
-              !trendingAlbumsData.some(existingAlbum => existingAlbum.id === newAlbum.id)
-            );
-
-            trendingAlbumsData = [...trendingAlbumsData, ...newAlbums];
-          }
-        }
-
-        // Increment page and render additional albums
-        trendingAlbumsPage++;
-        renderTrendingAlbums(0, trendingAlbumsPage * itemsPerPage);
-
-        // Update pagination controls
-        updateAlbumsPagination();
-      } catch (error) {
-        console.error('Error loading more albums:', error);
-        loadMoreBtn.textContent = 'Error loading more albums';
-        setTimeout(() => {
-          loadMoreBtn.textContent = 'Try Again';
-          loadMoreBtn.disabled = false;
-        }, 2000);
-      }
-    }
-*/
-    /* Search for album and show preview
-    async function searchAlbumAndPreview(albumTitle, artistName) {
-      try {
-        const query = `${encodeURIComponent(albumTitle)} ${encodeURIComponent(artistName)}`;
-        const response = await fetch(`https://itunes.apple.com/search?term=${query}&media=music&entity=album&limit=1`);
-        const data = await response.json();
-
-        if (data.results.length > 0) {
-          const album = data.results[0];
-
-          // Get songs from this album
-          const albumId = album.collectionId;
-          const songsResponse = await fetch(`https://itunes.apple.com/lookup?id=${albumId}&entity=song`);
-          const songsData = await songsResponse.json();
-
-          // Create a modal to display album and song previews
-          const modalId = 'albumModal' + Date.now();
-
-          const modal = document.createElement('div');
-          modal.classList.add('modal', 'fade');
-          modal.id = modalId;
-
-          // Build songs list
-          let songsHTML = '';
-          if (songsData.results && songsData.results.length > 1) {
-            songsHTML = '<div class="list-group mt-3">';
-            songsData.results.forEach((song, index) => {
-              if (index === 0) return; // Skip the first result which is the album itself
-
-              songsHTML += `
-                <div class="list-group-item list-group-item-action">
-                  <div class="d-flex w-100 justify-content-between align-items-center">
-                    <h6 class="mb-1">${index}. ${song.trackName}</h6>
-                    ${song.previewUrl ? `
-                      <audio controls class="audio-mini">
-                        <source src="${song.previewUrl}" type="audio/mpeg">
-                        Your browser does not support the audio element.
-                      </audio>
-                    ` : '<span class="text-muted">No preview available</span>'}
-                  </div>
-                </div>
-              `;
-            });
-            songsHTML += '</div>';
-          } else {
-            songsHTML = '<p class="text-center mt-3">No songs available for preview.</p>';
-          }
-
-          modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">${album.collectionName}</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <div class="row">
-                    <div class="col-md-4 text-center">
-                      <img src="${album.artworkUrl100.replace('100x100', '300x300')}" class="img-fluid mb-3" alt="${album.collectionName}">
-                      <p><strong>Artist:</strong> ${album.artistName}</p>
-                      <p><strong>Genre:</strong> ${album.primaryGenreName}</p>
-                      <p><strong>Released:</strong> ${new Date(album.releaseDate).toLocaleDateString()}</p>
-                      <button class="btn btn-primary" onclick="selectAlbum('${album.collectionName.replace(/'/g, "\\'")}', '${album.artistName.replace(/'/g, "\\'")}', '${album.artworkUrl100}', '${album.primaryGenreName.replace(/'/g, "\\'")}')">Select Album</button>
-                    </div>
-                    <div class="col-md-8">
-                      <h6>Tracks</h6>
-                      ${songsHTML}
-                    </div>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-              </div>
-            </div>
-          `;
-
-          document.body.appendChild(modal);
-
-          // Add some specific styling for the audio elements in the modal
-          const style = document.createElement('style');
-          style.textContent = `
-            .audio-mini {
-              width: 120px;
-              height: 30px;
-            }
-
-            .list-group-item {
-              padding: 8px 12px;
-            }
-          `;
-          document.head.appendChild(style);
-
-          // Show the modal
-          const modalInstance = new bootstrap.Modal(document.getElementById(modalId));
-          modalInstance.show();
-
-          // Remove modal from DOM when hidden
-          document.getElementById(modalId).addEventListener('hidden.bs.modal', function() {
-            document.body.removeChild(modal);
-            document.head.removeChild(style);
-          });
-        } else {
-          alert("Album information not available.");
-        }
-      } catch (error) {
-        console.error('Error displaying album:', error);
-        alert("Error displaying album. Please try again later.");
-      }
-    }
-*/
-    // Select album function
-    function selectAlbum(albumName, artistName, albumArt, genre) {
-      selectedAlbum = {
-        name: albumName,
-        artist: artistName,
-        albumArt,
-        genre
-      };
-
-      alert(`Selected album: ${albumName} by ${artistName}`);
-
-      // Show save button if user is logged in
-      if (loggedInUser) {
-        const saveButton = document.createElement('div');
-        saveButton.classList.add('fixed-bottom', 'bg-light', 'p-2', 'text-center');
-        saveButton.innerHTML = `
-          <p>You've selected "${albumName}" by ${artistName}</p>
-          <button class="btn btn-success" onclick="saveSelectedAlbum()">Save to Your Profile</button>
-        `;
-
-        // Remove any existing save button
-        const existingSaveButton = document.querySelector('.fixed-bottom');
-        if (existingSaveButton) {
-          existingSaveButton.remove();
-        }
-
-        document.body.appendChild(saveButton);
-      }
-    }
-
-    // Save selected album to user profile
-    async function saveSelectedAlbum() {
-      if (!selectedAlbum) {
-        alert("No album selected!");
-        return;
-      }
-
-      if (!loggedInUser) {
-        alert("You must log in to save albums!");
-        return;
-      }
-
-      try {
-        const data = await getJSONData();
-        let users = JSON.parse(data);
-
-        // Find user in the data
-        const userIndex = users.findIndex(user => user.Username === loggedInUser.Username);
-
-        if (userIndex === -1) {
-          alert("User not found. Please log in again.");
-          return;
-        }
-
-        // Initialize selectedAlbums array if it doesn't exist
-        if (!users[userIndex].selectedAlbums) {
-          users[userIndex].selectedAlbums = [];
-        }
-
-        // Check for duplicates
-        const albumExists = users[userIndex].selectedAlbums.some(album =>
-          album.name === selectedAlbum.name && album.artist === selectedAlbum.artist
-        );
-
-        if (albumExists) {
-          alert("This album is already in your collection!");
-          return;
-        }
-
-        // Add the album to the user's collection
-        users[userIndex].selectedAlbums.push(selectedAlbum);
-
-        // Save updated data
-        await putJSONData(users);
-
-        alert("Album saved to your profile!");
-
-        // Remove the save button
-        const saveButton = document.querySelector('.fixed-bottom');
-        if (saveButton) {
-          saveButton.remove();
-        }
-
-        // Refresh recommendations
-        loadPersonalizedRecommendations();
-
-      } catch (error) {
-        console.error("Error saving album:", error);
-        alert("Error saving album. Please try again.");
-      }
-    }
-
-    // Load personalized recommendations based on user's selected songs and albums
-    async function loadPersonalizedRecommendations() {
-          const personalizedDiv = document.getElementById('personalizedContent');
-          personalizedDiv.innerHTML = '<div class="loader"></div>';
-
-          try {
-              const data = await getJSONData();
-              const users = JSON.parse(data);
-              const currentUser = users.find(user => user.Username === loggedInUser.Username);
-
-              if (!currentUser || (!currentUser.selectedSongs || currentUser.selectedSongs.length === 0) &&
-                  (!currentUser.selectedAlbums || currentUser.selectedAlbums.length === 0)) {
-                  personalizedDiv.innerHTML = `
-        <p class="text-center">No recommendations available yet. Add some songs or albums to your profile first!</p>
-        <button class="btn btn-primary d-block mx-auto" onclick="window.location.href='songSearch.html'">Search for Music</button>
-      `;
-                  return;
-              }
-
-              // Collect artists and genres from user's selected songs and albums
-              const artists = [];
-              const genres = [];
-
-              if (currentUser.selectedSongs && currentUser.selectedSongs.length > 0) {
-                  currentUser.selectedSongs.forEach(song => {
-                      if (song.artist && !artists.includes(song.artist)) artists.push(song.artist);
-                      if (song.genre && !genres.includes(song.genre)) genres.push(song.genre);
-                  });
-              }
-
-              if (currentUser.selectedAlbums && currentUser.selectedAlbums.length > 0) {
-                  currentUser.selectedAlbums.forEach(album => {
-                      if (album.artist && !artists.includes(album.artist)) artists.push(album.artist);
-                      if (album.genre && !genres.includes(album.genre)) genres.push(album.genre);
-                  });
-              }
-
-              // Store all artists and genres in session storage for refreshing recommendations
-              sessionStorage.setItem('userArtists', JSON.stringify(artists));
-              sessionStorage.setItem('userGenres', JSON.stringify(genres));
-
-              // Start building recommendations HTML
-              let recsHTML = '<div class="row">';
-              let tracksAdded = 0;
-              const maxTracks = 6; // Maximum number of tracks to display
-
-              // Instead of using just the first artist, randomly select artists to use
-              // Shuffle the artists array
-              const shuffledArtists = [...artists].sort(() => 0.5 - Math.random());
-              const artistsToUse = shuffledArtists.slice(0, Math.min(3, shuffledArtists.length));
-
-              if (artistsToUse.length > 0) {
-                  recsHTML += '<div class="col-12"><h3>More from artists you like:</h3></div>';
-
-                  // Process each artist sequentially to avoid overwhelming the API
-                  for (const artist of artistsToUse) {
-                      if (tracksAdded >= maxTracks) break;
-
-                      try {
-                          const artistResponse = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&media=music&entity=song&limit=2`);
-                          const artistData = await artistResponse.json();
-
-                          if (artistData.results && artistData.results.length > 0) {
-                              for (const item of artistData.results) {
-                                  if (tracksAdded >= maxTracks) break;
-
-                                  // Create a safe version of strings for onclick attributes
-                                  const trackName = item.trackName.replace(/'/g, "\\'");
-                                  const artistName = item.artistName.replace(/'/g, "\\'");
-                                  const collectionName = item.collectionName.replace(/'/g, "\\'");
-
-                                  // Generate a unique ID for this recommendation card
-                                  const recId = `rec-${tracksAdded}-${Date.now()}`;
-
-                                  recsHTML += `
-                <div class="col-md-4 mb-4" id="${recId}">
-                  <div class="card h-100">
-                    <div class="position-absolute top-0 end-0 p-2">
-                      <button class="btn btn-sm btn-outline-danger" onclick="replaceRecommendation('${recId}', 'artist', '${artist}')">
-                        <i class="bi bi-x-circle"></i> Replace
-                      </button>
-                    </div>
-                    <img src="${item.artworkUrl100.replace('100x100', '300x300')}" class="card-img-top" alt="${item.trackName}">
-                    <div class="card-body">
-                      <h5 class="card-title">${item.trackName}</h5>
-                      <p class="card-text">Artist: ${item.artistName}</p>
-                      <p class="card-text">Album: ${item.collectionName}</p>
-                      <audio controls class="w-100 mb-2">
-                        <source src="${item.previewUrl}" type="audio/mpeg">
-                        Your browser does not support the audio element.
-                      </audio>
-                      <button class="btn btn-primary w-100" onclick="selectSong('${trackName}', '${artistName}', '${collectionName}', '${item.artworkUrl100}')">Select</button>
-                    </div>
-                  </div>
-                </div>
-              `;
-                                  tracksAdded++;
-                              }
-                          }
-                      } catch (error) {
-                          console.error(`Error fetching recommendations for artist ${artist}:`, error);
-                          // Continue with the next artist
-                      }
-                  }
-              }
-
-              // Handle genre-based recommendations if we still have room
-              if (tracksAdded < maxTracks && genres.length > 0) {
-                  // Shuffle the genres array
-                  const shuffledGenres = [...genres].sort(() => 0.5 - Math.random());
-                  const genresToUse = shuffledGenres.slice(0, Math.min(2, shuffledGenres.length));
-
-                  if (genresToUse.length > 0) {
-                      recsHTML += '<div class="col-12"><h3>Similar music you might enjoy:</h3></div>';
-
-                      // Process each genre sequentially
-                      for (const genre of genresToUse) {
-                          if (tracksAdded >= maxTracks) break;
-
-                          try {
-                              const genreResponse = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(genre)}&media=music&entity=song&limit=3`);
-                              const genreData = await genreResponse.json();
-
-                              if (genreData.results && genreData.results.length > 0) {
-                                  for (const item of genreData.results) {
-                                      if (tracksAdded >= maxTracks) break;
-
-                                      // Skip artists the user already likes
-                                      if (artists.includes(item.artistName)) continue;
-
-                                      // Create a safe version of strings for onclick attributes
-                                      const trackName = item.trackName.replace(/'/g, "\\'");
-                                      const artistName = item.artistName.replace(/'/g, "\\'");
-                                      const collectionName = item.collectionName.replace(/'/g, "\\'");
-
-                                      // Generate a unique ID for this recommendation card
-                                      const recId = `rec-${tracksAdded}-${Date.now()}`;
-
-                                      recsHTML += `
-                  <div class="col-md-4 mb-4" id="${recId}">
-                    <div class="card h-100">
-                      <div class="position-absolute top-0 end-0 p-2">
-                        <button class="btn btn-sm btn-outline-danger" onclick="replaceRecommendation('${recId}', 'genre', '${genre}')">
-                          <i class="bi bi-x-circle"></i> Replace
-                        </button>
-                      </div>
-                      <img src="${item.artworkUrl100.replace('100x100', '300x300')}" class="card-img-top" alt="${item.trackName}">
-                      <div class="card-body">
-                        <h5 class="card-title">${item.trackName}</h5>
-                        <p class="card-text">Artist: ${item.artistName}</p>
-                        <p class="card-text">Album: ${item.collectionName}</p>
-                        <audio controls class="w-100 mb-2">
-                          <source src="${item.previewUrl}" type="audio/mpeg">
-                          Your browser does not support the audio element.
-                        </audio>
-                        <button class="btn btn-primary w-100" onclick="selectSong('${trackName}', '${artistName}', '${collectionName}', '${item.artworkUrl100}')">Select</button>
-                      </div>
-                    </div>
-                  </div>
-                `;
-                                      tracksAdded++;
-                                  }
-                              }
-                          } catch (error) {
-                              console.error(`Error fetching recommendations for genre ${genre}:`, error);
-                              // Continue with the next genre
-                          }
-                      }
-                  }
-              }
-
-              recsHTML += '</div>';
-              personalizedDiv.innerHTML = recsHTML;
-
-              // Add Bootstrap Icons CSS if it's not already included
-              if (!document.querySelector('link[href*="bootstrap-icons"]')) {
-                  const iconLink = document.createElement('link');
-                  iconLink.rel = 'stylesheet';
-                  iconLink.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css';
-                  document.head.appendChild(iconLink);
-              }
-
-          } catch (error) {
-              console.error('Error loading personalized recommendations:', error);
-              personalizedDiv.innerHTML = '<p class="text-center">Error loading recommendations. Please try again later.</p>';
-          }
-      }
-
-      // Function to replace a recommendation with a new one
-      async function replaceRecommendation(recId, sourceType, sourceValue) {
-          // Show loading indicator in the card
-          const recCard = document.getElementById(recId);
-          if (!recCard) return;
-
-          const originalContent = recCard.innerHTML;
-          recCard.innerHTML = '<div class="card h-100 d-flex align-items-center justify-content-center"><div class="loader"></div></div>';
-
-          try {
-              // Get all user artists and genres from session storage
-              const artists = JSON.parse(sessionStorage.getItem('userArtists') || '[]');
-              const genres = JSON.parse(sessionStorage.getItem('userGenres') || '[]');
-
-              // Determine what type of recommendation to fetch
-              let fetchType, fetchValue;
-
-              if (sourceType === 'artist') {
-                  // Get a different artist or use genre if possible
-                  const otherArtists = artists.filter(a => a !== sourceValue);
-
-                  if (otherArtists.length > 0) {
-                      // Use another artist
-                      fetchType = 'artist';
-                      fetchValue = otherArtists[Math.floor(Math.random() * otherArtists.length)];
-                  } else if (genres.length > 0) {
-                      // Fall back to genre
-                      fetchType = 'genre';
-                      fetchValue = genres[Math.floor(Math.random() * genres.length)];
-                  } else {
-                      // No other sources, use a random music term
-                      fetchType = 'generic';
-                      const genericTerms = ['popular', 'new music', 'hit songs', 'top charts'];
-                      fetchValue = genericTerms[Math.floor(Math.random() * genericTerms.length)];
-                  }
-              } else {
-                  // Get a different genre or use artist if possible
-                  const otherGenres = genres.filter(g => g !== sourceValue);
-
-                  if (otherGenres.length > 0) {
-                      // Use another genre
-                      fetchType = 'genre';
-                      fetchValue = otherGenres[Math.floor(Math.random() * otherGenres.length)];
-                  } else if (artists.length > 0) {
-                      // Fall back to artist
-                      fetchType = 'artist';
-                      fetchValue = artists[Math.floor(Math.random() * artists.length)];
-                  } else {
-                      // No other sources, use a random music term
-                      fetchType = 'generic';
-                      const genericTerms = ['popular', 'new music', 'hit songs', 'top charts'];
-                      fetchValue = genericTerms[Math.floor(Math.random() * genericTerms.length)];
-                  }
-              }
-
-              // Fetch new recommendation
-              const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(fetchValue)}&media=music&entity=song&limit=5`);
-              const data = await response.json();
-
-              if (!data.results || data.results.length === 0) {
-                  // If no results, restore original content with an error message
-                  recCard.innerHTML = originalContent;
-                  alert("Couldn't find a replacement recommendation. Please try again.");
-                  return;
-              }
-
-              // Get user's selected artists to avoid recommending artists they already have
-              let existingArtists = artists || [];
-
-              // Find a result that's not from an artist the user already likes (if possible)
-              let validResult = null;
-              for (const result of data.results) {
-                  if (!existingArtists.includes(result.artistName)) {
-                      validResult = result;
-                      break;
-                  }
-              }
-
-              // If no valid result found, just use the first result
-              if (!validResult && data.results.length > 0) {
-                  validResult = data.results[0];
-              }
-
-              if (validResult) {
-                  // Create safe versions of strings
-                  const trackName = validResult.trackName.replace(/'/g, "\\'");
-                  const artistName = validResult.artistName.replace(/'/g, "\\'");
-                  const collectionName = validResult.collectionName.replace(/'/g, "\\'");
-
-                  // Update the card with the new recommendation
-                  recCard.innerHTML = `
-        <div class="card h-100">
-          <div class="position-absolute top-0 end-0 p-2">
-            <button class="btn btn-sm btn-outline-danger" onclick="replaceRecommendation('${recId}', '${fetchType}', '${fetchValue.replace(/'/g, "\\'")}')">
-              <i class="bi bi-x-circle"></i> Replace
-            </button>
-          </div>
-          <img src="${validResult.artworkUrl100.replace('100x100', '300x300')}" class="card-img-top" alt="${validResult.trackName}">
-          <div class="card-body">
-            <h5 class="card-title">${validResult.trackName}</h5>
-            <p class="card-text">Artist: ${validResult.artistName}</p>
-            <p class="card-text">Album: ${validResult.collectionName}</p>
-            <audio controls class="w-100 mb-2">
-              <source src="${validResult.previewUrl}" type="audio/mpeg">
-              Your browser does not support the audio element.
-            </audio>
-            <button class="btn btn-primary w-100" onclick="selectSong('${trackName}', '${artistName}', '${collectionName}', '${validResult.artworkUrl100}')">Select</button>
-          </div>
-        </div>
-      `;
-              } else {
-                  // If no valid result found after all, restore original content
-                  recCard.innerHTML = originalContent;
-                  alert("Couldn't find a replacement recommendation. Please try again.");
-              }
-          } catch (error) {
-              console.error('Error replacing recommendation:', error);
-              recCard.innerHTML = originalContent;
-              alert("Error finding replacement. Please try again.");
-          }
-      }
-    
-      
-
-    // Search for a specific song and play preview
-    async function searchAndPreview(songTitle, artistName) {
-      try {
-        const query = `${encodeURIComponent(songTitle)} ${encodeURIComponent(artistName)}`;
-        const response = await fetch(`https://itunes.apple.com/search?term=${query}&media=music&entity=song&limit=1`);
-        const data = await response.json();
-        
-        if (data.results.length > 0) {
-          const song = data.results[0];
-          const previewUrl = song.previewUrl;
-          
-          // Create a modal to play the preview
-          const modalId = 'previewModal' + Date.now();
-          
-          const modal = document.createElement('div');
-          modal.classList.add('modal', 'fade');
-          modal.id = modalId;
-          
-          modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">${song.trackName} - ${song.artistName}</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                  <img src="${song.artworkUrl100.replace('100x100', '300x300')}" class="img-fluid mb-3" alt="${song.trackName}">
-                  <audio controls autoplay class="w-100">
-                    <source src="${previewUrl}" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                  </audio>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary" onclick="selectSong('${song.trackName.replace(/'/g, "\\'")}', '${song.artistName.replace(/'/g, "\\'")}', '${song.collectionName.replace(/'/g, "\\'")}', '${song.artworkUrl100}')">Select Song</button>
-                </div>
-              </div>
-            </div>
-          `;
-          
-          document.body.appendChild(modal);
-          
-          // Show the modal
-          const modalInstance = new bootstrap.Modal(document.getElementById(modalId));
-          modalInstance.show();
-          
-          // Remove modal from DOM when hidden
-          document.getElementById(modalId).addEventListener('hidden.bs.modal', function() {
-            document.body.removeChild(modal);
-          });
-        } else {
-          alert("Preview not available for this song.");
-        }
-      } catch (error) {
-        console.error('Error playing preview:', error);
-        alert("Error playing preview. Please try again later.");
-      }
-    }
-    
-    // Select song function (same as in songSearch.html)
-    function selectSong(track, artist, album, albumArt) {
-      selectedSong = {
-        track,
-        artist,
-        album,
-        albumArt
-      };
-      
-      alert(`Selected: ${track} by ${artist}`);
-      
-      // Show save button if user is logged in
-      if (loggedInUser) {
-        const saveButton = document.createElement('div');
-        saveButton.classList.add('fixed-bottom', 'bg-light', 'p-2', 'text-center');
-        saveButton.innerHTML = `
-          <p>You've selected "${track}" by ${artist}</p>
-          <button class="btn btn-success" onclick="saveSelectedSong()">Save to Your Profile</button>
-        `;
-        
-        // Remove any existing save button
-        const existingSaveButton = document.querySelector('.fixed-bottom');
-        if (existingSaveButton) {
-          existingSaveButton.remove();
-        }
-        
-        document.body.appendChild(saveButton);
-      }
-    }
-    
-    // Save selected song to user profile
-    async function saveSelectedSong() {
-      if (!selectedSong) {
-        alert("No song selected!");
-        return;
-      }
-      
-      if (!loggedInUser) {
-        alert("You must log in to save songs!");
-        return;
-      }
-      
-      try {
-        const data = await getJSONData();
-        let users = JSON.parse(data);
-        
-        // Find user in the data
-        const userIndex = users.findIndex(user => user.Username === loggedInUser.Username);
-        
-        if (userIndex === -1) {
-          alert("User not found. Please log in again.");
-          return;
-        }
-        
-        // Initialize selectedSongs array if it doesn't exist
-        if (!users[userIndex].selectedSongs) {
-          users[userIndex].selectedSongs = [];
-        }
-        
-        // Check for duplicates
-        const songExists = users[userIndex].selectedSongs.some(song => 
-          song.track === selectedSong.track && song.artist === selectedSong.artist
-        );
-        
-        if (songExists) {
-          alert("This song is already in your collection!");
-          return;
-        }
-        
-        // Add the song to the user's collection
-        users[userIndex].selectedSongs.push(selectedSong);
-        
-        // Save updated data
-        await putJSONData(users);
-        
-        alert("Song saved to your profile!");
-        
-        // Remove the save button
-        const saveButton = document.querySelector('.fixed-bottom');
-        if (saveButton) {
-          saveButton.remove();
-        }
-        
-        // Refresh recommendations
-        loadPersonalizedRecommendations();
-        
-      } catch (error) {
-        console.error("Error saving song:", error);
-        alert("Error saving song. Please try again.");
-      }
-    }
-    let trendingLoaded = false;
-
-document.addEventListener('DOMContentLoaded', () => {
-  const trendingTab = document.getElementById('trending-tab');
-  trendingTab.addEventListener('click', () => {
-    if (!trendingLoaded) {
-      loadTrendingSongs();
-      loadTrendingAlbums();
-      trendingLoaded = true;
-    }
+    </div>
+
+    <div class="tab-pane fade" id="discover" role="tabpanel">
+      <h2 class="section-title">Discover By Genre</h2>
+      <div class="mb-4">
+        <select id="genreSelect" class="form-select">
+          <option value="all">All Genres</option>
+          <option value="pop">Pop</option>
+          <option value="rock">Rock</option>
+          <option value="hiphop">Hip Hop/Rap</option>
+          <option value="electronic">Electronic</option>
+          <option value="jazz">Jazz</option>
+          <option value="classical">Classical</option>
+          <option value="country">Country</option>
+          <option value="rnb">R&B/Soul</option>
+        </select>
+        <button class="btn btn-primary w-100 mt-2" onclick="discoverByGenre()">Discover</button>
+      </div>
+      <div id="discoverContent"></div>
+    </div>
+  </div>
+</div>
+
+<div id="userArea"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="getJSONData.js"></script>
+<script src="putJSONData.js"></script>
+<script>
+let loggedInUser = sessionStorage.getItem('loggedInUser') ? JSON.parse(sessionStorage.getItem('loggedInUser')) : null;
+let selectedSong = null;
+let selectedAlbum = null;
+let trendingSongsPage = 1;
+let trendingSongsData = [];
+const itemsPerPage = 10;
+
+window.addEventListener('DOMContentLoaded', () => {
+  updateUserArea();
+  if (loggedInUser) loadPersonalizedRecommendations();
+  document.getElementById('trending-tab').addEventListener('click', () => {
+    if (trendingSongsData.length === 0) loadTrendingSongs();
   });
 });
 
-  </script>
+function updateUserArea() {
+  const userArea = document.getElementById('userArea');
+  userArea.innerHTML = '';
+}
 
-<script>
-let discoverGenreData = {};
-let genrePageIndex = {};
-
-async function discoverByGenre() {
-  const genreSelect = document.getElementById('genreSelect');
-  const selectedGenre = genreSelect.value;
-  const discoverDiv = document.getElementById('discoverContent');
-  discoverDiv.innerHTML = '<div class="loader"></div>';
-
-  const genreIdMap = {
-    pop: 14,
-    rock: 21,
-    hiphop: 18,
-    electronic: 7,
-    jazz: 11,
-    classical: 5,
-    country: 6,
-    rnb: 15,
-  };
-
-  discoverGenreData = {};
-  genrePageIndex = {};
-
+async function loadTrendingSongs() {
+  const div = document.getElementById('trendingSongsContent');
+  div.innerHTML = '<div class="loader"></div>';
   try {
-    const genresToFetch = selectedGenre === 'all'
-      ? Object.entries(genreIdMap)
-      : [[selectedGenre, genreIdMap[selectedGenre]]];
-
-    const genreFetchPromises = genresToFetch.map(async ([key, id]) => {
-      const response = await fetch(`https://itunes.apple.com/us/rss/topsongs/limit=50/genre=${id}/json`);
-      const data = await response.json();
-      if (data.feed && data.feed.entry) {
-        discoverGenreData[key] = data.feed.entry;
-        genrePageIndex[key] = 0;
-      }
-    });
-
-    await Promise.all(genreFetchPromises);
-    renderGenrePage(selectedGenre);
-  } catch (error) {
-    console.error('Error loading genre data:', error);
-    discoverDiv.innerHTML = '<p class="text-center">Error loading results. Please try again later.</p>';
+    const res = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=100/json');
+    const data = await res.json();
+    trendingSongsData = data.feed.entry || [];
+    renderTrendingSongs(0, itemsPerPage);
+    updateSongsPagination();
+  } catch (e) {
+    div.innerHTML = '<p class="text-center">Error loading trending songs.</p>';
   }
 }
 
-function renderGenrePage(selectedGenre) {
-  const discoverDiv = document.getElementById('discoverContent');
-  discoverDiv.innerHTML = '';
-
-  const genresToRender = selectedGenre === 'all'
-    ? Object.keys(discoverGenreData)
-    : [selectedGenre];
-
-  genresToRender.forEach(genreKey => {
-    const songs = discoverGenreData[genreKey];
-    const currentPage = genrePageIndex[genreKey];
-    const pageSize = 10;
-    const start = currentPage * pageSize;
-    const pageItems = songs.slice(start, start + pageSize);
-
-    let html = `
-      <div class="col-12 mb-2 mt-4">
-        <h4>${genreKey.toUpperCase()}</h4>
-        <div class="row">
-    `;
-
-    pageItems.forEach(item => {
-      const title = item.title.label;
-      const artist = item['im:artist'].label;
-      const image = item['im:image'][2].label;
-      const category = item.category.attributes.term;
-
-      html += `
-        <div class="col-md-4 mb-4">
-          <div class="card h-100">
-            <img src="${image}" class="card-img-top" alt="${title}">
-            <div class="card-body">
-              <h5 class="card-title">${title}</h5>
-              <p class="card-text">Artist: ${artist}</p>
-              <p class="card-text">Genre: ${category}</p>
-              <button class="btn btn-primary w-100" onclick="searchAndPreview('${title.replace(/'/g, "\'")}', '${artist.replace(/'/g, "\'")}')">Listen Preview</button>
-            </div>
+function renderTrendingSongs(start, count) {
+  const div = document.getElementById('trendingSongsContent');
+  div.innerHTML = '';
+  const slice = trendingSongsData.slice(start, start + count);
+  if (slice.length === 0) {
+    div.innerHTML = '<p class="text-center">No songs available.</p>';
+    return;
+  }
+  slice.forEach(item => {
+    const title = item.title.label;
+    const artist = item['im:artist'].label;
+    const img = item['im:image'][2].label;
+    const genre = item.category.attributes.term;
+    div.innerHTML += `
+      <div class="col-md-4 mb-4">
+        <div class="card h-100">
+          <img src="${img}" class="card-img-top" alt="${title}">
+          <div class="card-body">
+            <h5 class="card-title">${title}</h5>
+            <p class="card-text">Artist: ${artist}</p>
+            <p class="card-text">Genre: ${genre}</p>
+            <button class="btn btn-primary" onclick="searchAndPreview('${title.replace(/'/g, "\'")}', '${artist.replace(/'/g, "\'")}')">Listen Preview</button>
           </div>
         </div>
-      `;
-    });
-
-    html += `
-        </div>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <button class="btn btn-outline-secondary" ${currentPage === 0 ? 'disabled' : ''} onclick="changeGenrePage('${genreKey}', -1)">Previous</button>
-          <span>Page ${currentPage + 1}</span>
-          <button class="btn btn-outline-secondary" ${(currentPage + 1) * 10 >= songs.length ? 'disabled' : ''} onclick="changeGenrePage('${genreKey}', 1)">Next</button>
-        </div>
       </div>`;
-    discoverDiv.innerHTML += html;
   });
 }
 
-function changeGenrePage(genreKey, direction) {
-  genrePageIndex[genreKey] += direction;
-  const selectedGenre = document.getElementById('genreSelect').value;
-  renderGenrePage(selectedGenre);
+function updateSongsPagination() {
+  const btn = document.getElementById('loadMoreSongs');
+  if (trendingSongsData.length <= trendingSongsPage * itemsPerPage) {
+    btn.disabled = true; btn.textContent = 'No More Songs';
+  } else {
+    btn.disabled = false; btn.textContent = 'Load 10 More';
+  }
+}
+
+async function loadMoreTrendingSongs() {
+  const btn = document.getElementById('loadMoreSongs');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
+  await new Promise(r => setTimeout(r, 500));
+  trendingSongsPage++;
+  renderTrendingSongs(0, trendingSongsPage * itemsPerPage);
+  updateSongsPagination();
+}
+
+async function loadPersonalizedRecommendations() {
+  const div = document.getElementById('personalizedContent');
+  div.innerHTML = '<div class="loader"></div>';
+  try {
+    const data = await getJSONData();
+    const users = JSON.parse(data);
+    const current = users.find(u => u.Username === loggedInUser.Username);
+    if (!current || ((!current.selectedSongs || !current.selectedSongs.length) && (!current.selectedAlbums || !current.selectedAlbums.length))) {
+    personalizedDiv.innerHTML = `
+          <p class="text-center">No recommendations available yet. Add some songs or albums to your profile first!</p>
+          <button class="btn btn-primary d-block mx-auto" onclick="window.location.href='songSearch.html'">Search for Music</button>
+        `;
+      return;
+    }
+    const artists = new Set(), genres = new Set();
+    (current.selectedSongs || []).forEach(s => { artists.add(s.artist); genres.add(s.genre); });
+    (current.selectedAlbums || []).forEach(a => { artists.add(a.artist); genres.add(a.genre); });
+    sessionStorage.setItem('userArtists', JSON.stringify([...artists]));
+    sessionStorage.setItem('userGenres', JSON.stringify([...genres]));
+    let html = '<div class="row">', count = 0, max = 6;
+    const pickArray = arr => arr.sort(() => 0.5 - Math.random()).slice(0, 3);
+    for (const artist of pickArray([...artists])) {
+      if (count>=max) break;
+      const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&media=music&entity=song&limit=2`);
+      const resd = await resp.json();
+      for (const it of resd.results || []) {
+        if (count>=max) break;
+        const t = it.trackName.replace(/'/g, "\'"), ar = it.artistName.replace(/'/g, "\'"), col = it.collectionName.replace(/'/g, "\'");
+        html += `<div class="col-md-4 mb-4"><div class="card h-100"><div class="position-absolute top-0 end-0 p-2"><button class="btn btn-sm btn-outline-danger" onclick="replaceRecommendation('rec${count}','artist','${artist.replace(/'/g,"\'")}')"><i class="bi bi-x-circle"></i> Replace</button></div><img src="${it.artworkUrl100.replace('100x100','300x300')}" class="card-img-top"><div class="card-body"><h5 class="card-title">${it.trackName}</h5><p class="card-text">Artist: ${it.artistName}</p><p class="card-text">Album: ${it.collectionName}</p><audio controls class="w-100 mb-2"><source src="${it.previewUrl}" type="audio/mpeg"></audio><button class="btn btn-primary w-100" onclick="selectSong('${t}','${ar}','${col}','${it.artworkUrl100}')">Select</button></div></div></div>`;
+        count++;
+      }
+    }
+    if (count<max) {
+      for (const genre of pickArray([...genres])) {
+        if (count>=max) break;
+        const resp = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(genre)}&media=music&entity=song&limit=3`);
+        const resd = await resp.json();
+        for (const it of resd.results || []) {
+          if (count>=max) break;
+          if ([...artists].includes(it.artistName)) continue;
+          const t = it.trackName.replace(/'/g, "\'"), ar = it.artistName.replace(/'/g, "\'"), col = it.collectionName.replace(/'/g, "\'");
+          html += `<div class="col-md-4 mb-4"><div class="card h-100"><div class="position-absolute top-0 end-0 p-2"><button class="btn btn-sm btn-outline-danger" onclick="replaceRecommendation('rec${count}','genre','${genre.replace(/'/g,"\'")}')"><i class="bi bi-x-circle"></i> Replace</button></div><img src="${it.artworkUrl100.replace('100x100','300x300')}" class="card-img-top"><div class="card-body"><h5 class="card-title">${it.trackName}</h5><p class="card-text">Artist: ${it.artistName}</p><p class="card-text">Album: ${it.collectionName}</p><audio controls class="w-100 mb-2"><source src="${it.previewUrl}" type="audio/mpeg"></audio><button class="btn btn-primary w-100" onclick="selectSong('${t}','${ar}','${col}','${it.artworkUrl100}')">Select</button></div></div></div>`;
+          count++;
+        }
+      }
+    }
+    html += '</div>';
+    div.innerHTML = html;
+  } catch (e) {
+    div.innerHTML = '<p class="text-center">Error loading recommendations.</p>';
+  }
+}
+
+async function replaceRecommendation(recId, sourceType, sourceValue) {
+  const card = document.getElementById(recId);
+  if (!card) return;
+  const orig = card.innerHTML;
+  card.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="loader"></div></div>';
+  try {
+    const artists = JSON.parse(sessionStorage.getItem('userArtists')||'[]');
+    const genres = JSON.parse(sessionStorage.getItem('userGenres')||'[]');
+    let fetchType = sourceType, fetchValue = sourceValue;
+    if (sourceType==='artist') {
+      const others = artists.filter(a=>a!==sourceValue);
+      if (others.length){ fetchValue=others[Math.floor(Math.random()*others.length)]; }
+      else if (genres.length){ fetchType='genre'; fetchValue=genres[Math.floor(Math.random()*genres.length)]; }
+    } else {
+      const others = genres.filter(g=>g!==sourceValue);
+      if (others.length){ fetchValue=others[Math.floor(Math.random()*others.length)]; }
+      else if (artists.length){ fetchType='artist'; fetchValue=artists[Math.floor(Math.random()*artists.length)]; }
+    }
+    const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(fetchValue)}&media=music&entity=song&limit=5`);
+    const data = await res.json();
+    let valid = data.results.find(r=>!(artists.includes(r.artistName))) || data.results[0];
+    if (!valid) throw new Error();
+    const t = valid.trackName.replace(/'/g, "\'"), ar=valid.artistName.replace(/'/g,"\'"), col=valid.collectionName.replace(/'/g,"\'");
+    card.innerHTML= `<div class="card h-100"><div class="position-absolute top-0 end-0 p-2"><button class="btn btn-sm btn-outline-danger" onclick="replaceRecommendation('${recId}','${fetchType}','${fetchValue.replace(/'/g,"\'")}')"><i class="bi bi-x-circle"></i> Replace</button></div><img src="${valid.artworkUrl100.replace('100x100','300x300')}" class="card-img-top"><div class="card-body"><h5 class="card-title">${valid.trackName}</h5><p class="card-text">Artist: ${valid.artistName}</p><p class="card-text">Album: ${valid.collectionName}</p><audio controls class="w-100 mb-2"><source src="${valid.previewUrl}" type="audio/mpeg"></audio><button class="btn btn-primary w-100" onclick="selectSong('${t}','${ar}','${col}','${valid.artworkUrl100}')">Select</button></div></div>`;
+  } catch {
+    card.innerHTML = orig;
+    alert("Could not replace recommendation.");
+  }
+}
+
+async function searchAndPreview(songTitle, artistName) {
+  try {
+    const q = `${encodeURIComponent(songTitle)}%20${encodeURIComponent(artistName)}`;
+    const res = await fetch(`https://itunes.apple.com/search?term=${q}&media=music&entity=song&limit=1`);
+    const data = await res.json();
+    if (!data.results.length) { alert("No preview available."); return; }
+    const song = data.results[0];
+    const modalId = 'modal'+Date.now();
+    const modal = document.createElement('div');
+    modal.className='modal fade'; modal.id=modalId;
+    modal.innerHTML = `<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">${song.trackName} - ${song.artistName}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><img src="${song.artworkUrl100.replace('100x100','300x300')}" class="img-fluid mb-3"><audio controls autoplay class="w-100"><source src="${song.previewUrl}" type="audio/mpeg"></audio></div><div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button><button class="btn btn-primary" onclick="selectSong('${song.trackName.replace(/'/g,"\'")}','${song.artistName.replace(/'/g,"\'")}','${song.collectionName.replace(/'/g,"\'")}','${song.artworkUrl100}')">Select Song</button></div></div></div>`;
+    document.body.append(modal);
+    const bsModal = new bootstrap.Modal(document.getElementById(modalId)); bsModal.show();
+    document.getElementById(modalId).addEventListener('hidden.bs.modal',()=>modal.remove());
+  } catch { alert("Error playing preview."); }
+}
+
+function selectSong(track, artist, album, albumArt) {
+  selectedSong = { track, artist, album, albumArt };
+  alert(`Selected: ${track} by ${artist}`);
+  if (!loggedInUser) return;
+  const saveBtn = document.createElement('div');
+  saveBtn.className='fixed-bottom bg-light p-2 text-center';
+  saveBtn.innerHTML = `<p>You've selected "${track}" by ${artist}</p><button class="btn btn-success" onclick="saveSelectedSong()">Save to Your Profile</button>`;
+  document.querySelector('.fixed-bottom')?.remove();
+  document.body.append(saveBtn);
+}
+
+async function saveSelectedSong() {
+  if (!selectedSong || !loggedInUser) { alert("Select a song first."); return; }
+  try {
+    const data = await getJSONData(); const users = JSON.parse(data);
+    const idx = users.findIndex(u=>u.Username===loggedInUser.Username);
+    if (idx<0) throw "";
+    users[idx].selectedSongs = users[idx].selectedSongs||[];
+    if (users[idx].selectedSongs.some(s=>s.track===selectedSong.track&&s.artist===selectedSong.artist)) { alert("Already saved."); return; }
+    users[idx].selectedSongs.push(selectedSong);
+    await putJSONData(users);
+    alert("Song saved!");
+    document.querySelector('.fixed-bottom')?.remove();
+    loadPersonalizedRecommendations();
+  } catch { alert("Error saving song."); }
+}
+
+function discoverByGenre() {
+  const select = document.getElementById('genreSelect');
+  const content = document.getElementById('discoverContent');
+  content.innerHTML = '<div class="loader"></div>';
+  const map = { pop:14, rock:21, hiphop:18, electronic:7, jazz:11, classical:5, country:6, rnb:15 };
+  const genres = select.value==='all'? Object.entries(map): [[select.value,map[select.value]]];
+  Promise.all(genres.map(([k,id])=>fetch(`https://itunes.apple.com/us/rss/topsongs/limit=50/genre=${id}/json`).then(r=>r.json()).then(d=>({k,entries:d.feed.entry||[]}))))
+    .then(results=>{
+      content.innerHTML='';
+      results.forEach(({k,entries})=>{
+        let page=0, per=10;
+        const render=()=>{
+          const start=page*per, slice=entries.slice(start,start+per);
+          let html=`<div class="mb-4"><h4>${k.toUpperCase()}</h4><div class="row">`;
+          slice.forEach(item=> {
+            const title=item.title.label, artist=item['im:artist'].label, img=item['im:image'][2].label, cat=item.category.attributes.term;
+            html+=`<div class="col-md-4 mb-4"><div class="card h-100"><img src="${img}" class="card-img-top"><div class="card-body"><h5>${title}</h5><p>Artist: ${artist}</p><p>Genre: ${cat}</p><button class="btn btn-primary w-100" onclick="searchAndPreview('${title.replace(/'/g,"\'")}','${artist.replace(/'/g,"\'")}')">Listen Preview</button></div></div></div>`;
+          });
+          html+=`</div><div class="d-flex justify-content-between align-items-center"><button class="btn btn-outline-secondary"${page===0?' disabled':''} onclick="${k}Page--,render()}">Previous</button><span>Page ${page+1}</span><button class="btn btn-outline-secondary"${(page+1)*per>=entries.length?' disabled':''} onclick="${k}Page++,render()}">Next</button></div></div>`;
+          content.innerHTML+=html;
+        };
+        render();
+      });
+    }).catch(()=>content.innerHTML='<p class="text-center">Error loading genres.</p>');
 }
 </script>
 </body>
