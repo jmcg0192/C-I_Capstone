@@ -7,7 +7,6 @@
 
   <!-- Imported item classes, things like delete buttons being red -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 
   <style>
@@ -35,6 +34,11 @@
       max-width: 1000px;
       margin: 2rem auto;
       padding: 1rem;
+    }
+    .follow-section {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2rem;
     }
     .grid {
       display: grid;
@@ -91,9 +95,32 @@
   <div class="profile-container">
     <h2 id="userHeader">Welcome!</h2>
 
+    <!-- Followers & Following Section -->
+    <div class="follow-section">
+      <!-- Followers -->
+      <div class="followers">
+        <h5>
+          <span id="followerCount" class="badge bg-primary"></span>
+          Followers
+        </h5>
+        <button class="btn btn-secondary btn-sm" id="viewFollowersBtn">View Followers</button>
+      </div>
+
+      <!-- Following -->
+      <div class="following">
+        <h5>
+          <span id="followingCount" class="badge bg-success"></span>
+          Following
+        </h5>
+        <button class="btn btn-secondary btn-sm" id="viewFollowingBtn">View Following</button>
+      </div>
+    </div>
+
+    <!-- Saved Songs -->
     <h4 class="mt-4">Saved Songs</h4>
     <div class="grid" id="songsGrid"></div>
 
+    <!-- Saved Albums -->
     <h4 class="mt-5">Saved Albums</h4>
     <div class="grid" id="albumsGrid"></div>
   </div>
@@ -106,7 +133,44 @@
     const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
     if (!user) window.location.href = "jukebox.html";
 
+    // Update profile header
     document.getElementById("userHeader").textContent = `Welcome, ${user.Username}!`;
+
+    // Update follower and following counts
+    document.getElementById("followerCount").textContent = user.follower_count || 0;
+    document.getElementById("followingCount").textContent = user.following_count || 0;
+
+    // View followers
+    const viewFollowersBtn = document.getElementById("viewFollowersBtn");
+    viewFollowersBtn.addEventListener("click", () => {
+      const followersArray = user.followers;
+
+      let followersMessage;
+      if(followersArray.length > 0) {
+        followersMessage = followersArray.join("\n")
+      }
+      else {
+        followersMessage = "No followers yet!";
+      }
+
+      alert(`Followers:\n${followersMessage}`);
+    });
+
+    // View following
+    const viewFollowingBtn = document.getElementById("viewFollowingBtn");
+    viewFollowingBtn.addEventListener("click", () => {
+      const followingArray = user.following;
+
+      let followingMessage;
+      if (followingArray.length > 0) {
+        followingMessage = followingArray.join("\n");
+      }
+      else {
+        followingMessage = "You aren't following anyone yet!";
+      }
+
+      alert(`Following:\n${followingMessage}`);
+    });
 
     const songsGrid = document.getElementById("songsGrid");
     const albumsGrid = document.getElementById("albumsGrid");
@@ -123,18 +187,6 @@
         }
       }
       return stars;
-    };
-
-
-    const updateBackend = async () => {
-      const data = await getJSONData();
-      const allUsers = JSON.parse(data);
-      const index = allUsers.findIndex(u => u.Username === user.Username);
-      if (index === -1) return;
-
-      allUsers[index] = user;
-      await putJSONData(allUsers);
-      sessionStorage.setItem("loggedInUser", JSON.stringify(user));
     };
 
     const renderSongs = () => {
@@ -188,6 +240,18 @@
         albumsGrid.appendChild(tile);
       });
     };
+
+    const updateBackend = async () => {
+      const data = await getJSONData();
+      const allUsers = JSON.parse(data);
+      const index = allUsers.findIndex(u => u.Username === user.Username);
+      if (index === -1) return;
+
+      allUsers[index] = user;
+      await putJSONData(allUsers);
+      sessionStorage.setItem("loggedInUser", JSON.stringify(user));
+    };
+
     renderSongs();
     renderAlbums();
   </script>
