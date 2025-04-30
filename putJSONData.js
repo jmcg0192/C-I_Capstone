@@ -18,7 +18,7 @@ const putJSONData = async (updatedData) => {
 		throw new Error('Failed to update data');
 	  }
   
-	  //alert('Data successfully updated'); //Removed this, as every time I deleted an album it threw a popup you had to click off of
+	  alert('Data successfully updated'); //Removed this, as every time I deleted an album it threw a popup you had to click off of
 	  return await response.json();
 	} catch (error) {
 	  console.error('Error:', error.message);

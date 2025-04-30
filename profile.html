@@ -75,13 +75,15 @@
 </head>
 <body>
   <nav class="navbar navbar-expand-lg px-3">
-    <a class="navbar-brand" href="#">Jukeboxd</a>
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="JukeBoxicon.png" alt="Jukeboxd Logo" style="height: 60px; margin-left: 12px;">
+    </a>
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="songSearch.html">Search</a></li>
         <li class="nav-item"><a class="nav-link" href="recommendation.html">Recommendations</a></li>
         <li class="nav-item"><a class="nav-link" href="friends.html">Friends</a></li>
-        <li class="nav-item"><a class="nav-link" href="jukebox.html">Logout</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html">Logout</a></li>
       </ul>
     </div>
   </nav>
@@ -112,10 +114,17 @@
     const createStars = (rating = 0) => {
       let stars = "";
       for (let i = 1; i <= 5; i++) {
-        stars += `<span class="star ${i <= rating ? "selected" : ""}">&#9733;</span>`;
+        if (rating >= i) {
+          stars += `<i class="fas fa-star star selected"></i>`;
+        } else if (rating >= i - 0.5) {
+          stars += `<i class="fas fa-star-half-alt star selected"></i>`;
+        } else {
+          stars += `<i class="far fa-star star"></i>`;
+        }
       }
       return stars;
     };
+
 
     const updateBackend = async () => {
       const data = await getJSONData();
@@ -130,7 +139,11 @@
 
     const renderSongs = () => {
       songsGrid.innerHTML = "";
-      user.selectedSongs?.forEach((song, index) => {
+      const sortedSongs = [...(user.selectedSongs || [])].sort((a, b) =>
+        a.artist.localeCompare(b.artist)
+      );
+
+      sortedSongs.forEach((song, index) => {
         const tile = document.createElement("div");
         tile.className = "tile";
         tile.innerHTML = `
@@ -152,7 +165,11 @@
 
     const renderAlbums = () => {
       albumsGrid.innerHTML = "";
-      user.selectedAlbums?.forEach((album, index) => {
+      const sortedAlbums = [...(user.selectedAlbums || [])].sort((a, b) =>
+        a.artist.localeCompare(b.artist)
+      );
+
+      sortedAlbums.forEach((album, index) => {
         const tile = document.createElement("div");
         tile.className = "tile";
         tile.innerHTML = `
@@ -171,7 +188,6 @@
         albumsGrid.appendChild(tile);
       });
     };
-
     renderSongs();
     renderAlbums();
   </script>

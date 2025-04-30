@@ -93,8 +93,12 @@
       color: #888;
       font-size: 1rem;
       cursor: pointer;
+      margin: 0 1px;
     }
-    .star.selected {
+    .star.full {
+      color: gold;
+    }
+    .star.half {
       color: gold;
     }
     .audio-preview, .add-btn {
@@ -120,12 +124,14 @@
 <body>
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Jukeboxd</a>
+      <a class="navbar-brand d-flex align-items-center" href="#">
+        <img src="JukeBoxicon.png" alt="Jukeboxd Logo" style="height: 60px; margin-left: 12px;">
+      </a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
           <li class="nav-item"><a class="nav-link" href="recommendation.html">Recommendations</a></li>
-          <li class="nav-item"><a class="nav-link" href="jukebox.html">Logout</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -151,7 +157,7 @@
     const currentUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
 
     async function saveToUserList(item, isAlbum) {
-      const rating = parseInt(localStorage.getItem(`rating-${item.id}`)) || 0; // Add rating to backend
+      const rating = parseFloat(localStorage.getItem(`rating-${item.id}`)) || 0;
       item.rating = rating;
 
       const data = await getJSONData();
@@ -174,30 +180,51 @@
     }
 
     function createStarRating(id) {
-      const container = document.createElement("div");
-      container.className = "stars";
-      for (let i = 1; i <= 5; i++) {
-        const star = document.createElement("i");
-        star.className = "fas fa-star star";
-        star.dataset.value = i;
-        star.addEventListener("click", () => {
-          const stars = container.querySelectorAll(".star");
-          stars.forEach((s, index) => {
-            s.classList.toggle("selected", index < i);
-          });
-          localStorage.setItem(`rating-${id}`, i);
-        });
-        container.appendChild(star);
+  const container = document.createElement("div");
+  container.className = "stars";
+
+  const maxStars = 5;
+
+  function render(rating) {
+    container.innerHTML = "";
+    for (let i = 1; i <= maxStars; i++) {
+      const star = document.createElement("i");
+      const full = i <= rating;
+      const half = (i - 0.5) === rating;
+
+      if (full) {
+        star.className = "fas fa-star star full";
+      } else if (half) {
+        star.className = "fas fa-star-half-alt star half";
+      } else {
+        star.className = "far fa-star star";
       }
-      const savedRating = parseInt(localStorage.getItem(`rating-${id}`));
-      if (savedRating) {
-        const stars = container.querySelectorAll(".star");
-        stars.forEach((s, index) => {
-          s.classList.toggle("selected", index < savedRating);
-        });
-      }
-      return container;
+
+      // Clickable area logic
+      star.addEventListener("mousemove", (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const isLeftHalf = e.clientX - rect.left < rect.width / 2;
+        star.style.cursor = "pointer";
+        star.title = isLeftHalf ? `${i - 0.5}` : `${i}`;
+      });
+
+      star.addEventListener("click", (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const isLeftHalf = e.clientX - rect.left < rect.width / 2;
+        const selectedRating = isLeftHalf ? i - 0.5 : i;
+        localStorage.setItem(`rating-${id}`, selectedRating);
+        render(selectedRating);
+      });
+
+      container.appendChild(star);
     }
+  }
+
+  const savedRating = parseFloat(localStorage.getItem(`rating-${id}`)) || 0;
+  render(savedRating);
+  return container;
+}
+
 
     document.getElementById("searchInput").addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
