@@ -112,13 +112,26 @@
       border-radius: 5px;
     }
     .tracklist li {
-      font-size: 0.8rem;
-      padding: 2px 0;
+      font-size: 0.85rem;
+      padding: 4px 0;
+      display: flex;
+      flex-direction: column;
+      word-wrap: break-word;
     }
+
     .tracklist audio {
-      margin-left: 0.5rem;
-      height: 20px;
+      margin-top: 4px;
+      width: 100%;
+      height: 30px; /* increased for better visibility */
     }
+
+    .audio-preview audio {
+      margin-top: 4px;
+      width: 100%;
+      height: 30px; /* match album preview size */
+    }
+
+
   </style>
 </head>
 <body>
@@ -302,7 +315,13 @@
                   <button class="btn btn-sm btn-outline-light add-btn" onclick='saveToUserList(${JSON.stringify(itemData)}, false)'>+ Add to List</button>
               `;
               if (item.previewUrl) {
-                tileContent += `<div class="audio-preview"><audio controls src="${item.previewUrl}"></audio></div>`;
+                tileContent += `
+                <div class="tracklist">
+                  <li>
+                    Track Preview:
+                    <audio controls src="${item.previewUrl}"></audio>
+                  </li>
+                </div>`;
               }
               tileContent += `</div>`;
               tile.innerHTML = tileContent;
