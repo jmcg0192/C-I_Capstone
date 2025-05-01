@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Profile - Jukeboxd</title>
 
-  <!-- Imported item classes, things like delete buttons being red -->
+  <!-- Imported item classes -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 
@@ -136,39 +136,26 @@
     // Update profile header
     document.getElementById("userHeader").textContent = `Welcome, ${user.Username}!`;
 
-    // Update follower and following counts
-    document.getElementById("followerCount").textContent = user.follower_count || 0;
-    document.getElementById("followingCount").textContent = user.following_count || 0;
+    // Function to update follower count dynamically
+    const updateFollowerCount = () => {
+      document.getElementById("followerCount").textContent = user.followers.length || 0;
+    };
 
     // View followers
-    const viewFollowersBtn = document.getElementById("viewFollowersBtn");
-    viewFollowersBtn.addEventListener("click", () => {
+    document.getElementById("viewFollowersBtn").addEventListener("click", () => {
       const followersArray = user.followers;
-
-      let followersMessage;
-      if(followersArray.length > 0) {
-        followersMessage = followersArray.join("\n")
-      }
-      else {
-        followersMessage = "No followers yet!";
-      }
-
+      const followersMessage = followersArray.length > 0
+        ? followersArray.join("\n")
+        : "No followers yet!";
       alert(`Followers:\n${followersMessage}`);
     });
 
     // View following
-    const viewFollowingBtn = document.getElementById("viewFollowingBtn");
-    viewFollowingBtn.addEventListener("click", () => {
+    document.getElementById("viewFollowingBtn").addEventListener("click", () => {
       const followingArray = user.following;
-
-      let followingMessage;
-      if (followingArray.length > 0) {
-        followingMessage = followingArray.join("\n");
-      }
-      else {
-        followingMessage = "You aren't following anyone yet!";
-      }
-
+      const followingMessage = followingArray.length > 0
+        ? followingArray.join("\n")
+        : "You aren't following anyone yet!";
       alert(`Following:\n${followingMessage}`);
     });
 
@@ -189,39 +176,9 @@
       return stars;
     };
 
-    const renderSongs = () => {
-      songsGrid.innerHTML = "";
-      const sortedSongs = [...(user.selectedSongs || [])].sort((a, b) =>
-        a.artist.localeCompare(b.artist)
-      );
-
-      sortedSongs.forEach((song, index) => {
-        const tile = document.createElement("div");
-        tile.className = "tile";
-        tile.innerHTML = `
-          <img src="${song.artwork}" alt="cover">
-          <div class="title">${song.title}</div>
-          <div class="artist">${song.artist}</div>
-          <div class="stars">${createStars(song.rating)}</div>
-          <button class="btn btn-sm btn-danger mt-2 delete-btn">Delete Single</button>
-        `;
-        tile.querySelector(".delete-btn").addEventListener("click", async () => {
-          console.log("Deleting song at index:", index);
-          user.selectedSongs.splice(index, 1);
-          await updateBackend();
-          renderSongs();
-        });
-        songsGrid.appendChild(tile);
-      });
-    };
-
     const renderAlbums = () => {
       albumsGrid.innerHTML = "";
-      const sortedAlbums = [...(user.selectedAlbums || [])].sort((a, b) =>
-        a.artist.localeCompare(b.artist)
-      );
-
-      sortedAlbums.forEach((album, index) => {
+      user.selectedAlbums.forEach((album) => {
         const tile = document.createElement("div");
         tile.className = "tile";
         tile.innerHTML = `
@@ -232,31 +189,19 @@
           <button class="btn btn-sm btn-danger mt-2 delete-btn">Delete Album</button>
         `;
         tile.querySelector(".delete-btn").addEventListener("click", async () => {
-          console.log("Deleting album at index:", index);
-          user.selectedAlbums.splice(index, 1);
-          await updateBackend();
+          console.log("Deleting album:", album.title);
+          user.selectedAlbums = user.selectedAlbums.filter(a => a.id !== album.id);
+          await putJSONData(user);
+          sessionStorage.setItem("loggedInUser", JSON.stringify(user));
           renderAlbums();
         });
         albumsGrid.appendChild(tile);
       });
     };
 
-    const updateBackend = async () => {
-      const data = await getJSONData();
-      const allUsers = JSON.parse(data);
-      const index = allUsers.findIndex(u => u.Username === user.Username);
-      if (index === -1) return;
-
-      allUsers[index] = user;
-      await putJSONData(allUsers);
-      sessionStorage.setItem("loggedInUser", JSON.stringify(user));
-    };
-
-    renderSongs();
     renderAlbums();
   </script>
 
-  <!-- Include Bootstrap JS bundle (with Popper) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
