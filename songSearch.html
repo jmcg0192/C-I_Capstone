@@ -95,14 +95,15 @@
       cursor: pointer;
       margin: 0 1px;
     }
-    .star.full {
-      color: gold;
-    }
+    .star.full,
     .star.half {
       color: gold;
     }
-    .audio-preview, .add-btn {
-      margin-top: 0.5rem;
+    .audio-preview audio,
+    .tracklist audio {
+      margin-top: 4px;
+      width: 100%;
+      height: 30px;
     }
     .tracklist {
       text-align: left;
@@ -118,20 +119,6 @@
       flex-direction: column;
       word-wrap: break-word;
     }
-
-    .tracklist audio {
-      margin-top: 4px;
-      width: 100%;
-      height: 30px; /* increased for better visibility */
-    }
-
-    .audio-preview audio {
-      margin-top: 4px;
-      width: 100%;
-      height: 30px; /* match album preview size */
-    }
-
-
   </style>
 </head>
 <body>
@@ -193,51 +180,43 @@
     }
 
     function createStarRating(id) {
-  const container = document.createElement("div");
-  container.className = "stars";
+      const container = document.createElement("div");
+      container.className = "stars";
 
-  const maxStars = 5;
+      const maxStars = 5;
+      function render(rating) {
+        container.innerHTML = "";
+        for (let i = 1; i <= maxStars; i++) {
+          const star = document.createElement("i");
+          const full = i <= rating;
+          const half = (i - 0.5) === rating;
 
-  function render(rating) {
-    container.innerHTML = "";
-    for (let i = 1; i <= maxStars; i++) {
-      const star = document.createElement("i");
-      const full = i <= rating;
-      const half = (i - 0.5) === rating;
+          if (full) star.className = "fas fa-star star full";
+          else if (half) star.className = "fas fa-star-half-alt star half";
+          else star.className = "far fa-star star";
 
-      if (full) {
-        star.className = "fas fa-star star full";
-      } else if (half) {
-        star.className = "fas fa-star-half-alt star half";
-      } else {
-        star.className = "far fa-star star";
+          star.addEventListener("mousemove", (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const isLeftHalf = e.clientX - rect.left < rect.width / 2;
+            star.title = isLeftHalf ? `${i - 0.5}` : `${i}`;
+          });
+
+          star.addEventListener("click", (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const isLeftHalf = e.clientX - rect.left < rect.width / 2;
+            const selectedRating = isLeftHalf ? i - 0.5 : i;
+            localStorage.setItem(`rating-${id}`, selectedRating);
+            render(selectedRating);
+          });
+
+          container.appendChild(star);
+        }
       }
 
-      // Clickable area logic
-      star.addEventListener("mousemove", (e) => {
-        const rect = e.target.getBoundingClientRect();
-        const isLeftHalf = e.clientX - rect.left < rect.width / 2;
-        star.style.cursor = "pointer";
-        star.title = isLeftHalf ? `${i - 0.5}` : `${i}`;
-      });
-
-      star.addEventListener("click", (e) => {
-        const rect = e.target.getBoundingClientRect();
-        const isLeftHalf = e.clientX - rect.left < rect.width / 2;
-        const selectedRating = isLeftHalf ? i - 0.5 : i;
-        localStorage.setItem(`rating-${id}`, selectedRating);
-        render(selectedRating);
-      });
-
-      container.appendChild(star);
+      const savedRating = parseFloat(localStorage.getItem(`rating-${id}`)) || 0;
+      render(savedRating);
+      return container;
     }
-  }
-
-  const savedRating = parseFloat(localStorage.getItem(`rating-${id}`)) || 0;
-  render(savedRating);
-  return container;
-}
-
 
     document.getElementById("searchInput").addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
@@ -262,7 +241,7 @@
               if (albumSeen.has(id)) return;
               albumSeen.add(id);
 
-              fetch(`https://itunes.apple.com/lookup?id=${id}&entity=song`)
+              fetch(`https://corsproxy.io/?https://itunes.apple.com/lookup?id=${id}&entity=song`)
                 .then(res => res.json())
                 .then(albumData => {
                   const tracks = albumData.results.filter(i => i.wrapperType === 'track');
@@ -289,7 +268,8 @@
                   `;
                   tile.querySelector(".album-info").appendChild(createStarRating(itemData.id));
                   albumsDiv.appendChild(tile);
-                });
+                })
+                .catch(err => console.error("Album lookup error:", err));
             });
 
             singles.forEach(item => {
@@ -306,7 +286,6 @@
 
               const tile = document.createElement("div");
               tile.className = "album-tile";
-
               let tileContent = `
                 <img src="${itemData.artwork}" alt="Artwork">
                 <div class="album-info">
@@ -316,16 +295,12 @@
               `;
               if (item.previewUrl) {
                 tileContent += `
-                <div class="tracklist">
-                  <li>
-                    Track Preview:
-                    <audio controls src="${item.previewUrl}"></audio>
-                  </li>
-                </div>`;
+                  <div class="tracklist">
+                    <li>Preview:<audio controls src="${item.previewUrl}"></audio></li>
+                  </div>`;
               }
               tileContent += `</div>`;
               tile.innerHTML = tileContent;
-
               tile.querySelector(".album-info").appendChild(createStarRating(itemData.id));
               singlesDiv.appendChild(tile);
             });
@@ -341,7 +316,7 @@
         return;
       }
       button.textContent = "Loading...";
-      fetch(`https://itunes.apple.com/lookup?id=${collectionId}&entity=song`)
+      fetch(`https://corsproxy.io/?https://itunes.apple.com/lookup?id=${collectionId}&entity=song`)
         .then(res => res.json())
         .then(data => {
           const tracks = data.results.filter(item => item.wrapperType === 'track');
@@ -351,6 +326,11 @@
           }).join('');
           tracklist.style.display = "block";
           button.textContent = "Hide Tracks";
+        })
+        .catch(err => {
+          button.textContent = "Show Tracks";
+          alert("Error loading tracks.");
+          console.error("Track toggle error:", err);
         });
     }
   </script>
