@@ -76,8 +76,7 @@
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
       try {
-        const data = await getJSONData();
-        const users = JSON.parse(data);
+        const users = await getJSONData(); // Already parsed
         const loggedInUser = users.find(user => user.Username === username && user.Password === password);
         if (loggedInUser) {
           alert("Login Successful");
@@ -91,6 +90,7 @@
         console.error("Login error:", error);
       }
     }
+
   </script>
 </body>
 </html>

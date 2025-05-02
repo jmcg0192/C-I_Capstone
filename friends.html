@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Friends - Jukeboxd</title>
+
+  <!-- Imported item classes -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+      font-family: 'Roboto', sans-serif;
+    }
+    .navbar {
+      background-color: #1f1f1f;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+    }
+    .navbar-brand {
+      color: #00b894;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .nav-link {
+      color: #ccc;
+    }
+    .nav-link:hover {
+      color: #fff;
+    }
+    .profile-container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    .tile {
+      background-color: #1f1f1f;
+      padding: 0.5rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .tile img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .title {
+      font-weight: bold;
+      margin-top: 0.5rem;
+    }
+    .artist {
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+    .stars {
+      margin-top: 0.5rem;
+    }
+    .star {
+      color: #888;
+      font-size: 1rem;
+    }
+    .star.selected {
+      color: gold;
+    }
+    .search-bar {
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg px-3">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="JukeBoxicon.png" alt="Jukeboxd Logo" style="height: 60px; margin-left: 12px;">
+    </a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="songSearch.html">Search</a></li>
+        <li class="nav-item"><a class="nav-link" href="recommendation.html">Recommendations</a></li>
+        <li class="nav-item"><a class="nav-link" href="profile.html">Back to Profile</a></li>
+        <li class="nav-item"><a class="nav-link" href="index.html">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="profile-container">
+    <h2 id="userHeader">Welcome!</h2>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search for users..." />
+      <button class="btn btn-primary mt-3" id="searchBtn">Search For Users</button>
+      <button class="btn btn-primary mt-3" id="addFriendsBtn">Follow User</button>
+      <button class="btn btn-primary btn-danger mt-3 delete-btn" id="unfollowBtn">Unfollow User</button>
+    </div>
+
+    <h4 class="mt-4">User's Saved Songs</h4>
+    <div class="grid" id="songsGrid"></div>
+
+    <h4 class="mt-5">User's Saved Albums</h4>
+    <div class="grid" id="albumsGrid"></div>
+  </div>
+
+
+  <script src="getJSONData.js"></script>
+  <script src="putJSONData.js"></script>
+
+  <script>
+    const user = JSON.parse(sessionStorage.getItem("loggedInUser"));
+    if (!user) window.location.href = "jukebox.html";
+
+    document.getElementById("userHeader").textContent = `Welcome, ${user.Username}!`;
+
+    const songsGrid = document.getElementById("songsGrid");
+    const albumsGrid = document.getElementById("albumsGrid");
+
+    let currentSearchedUser = null;
+
+    const createStars = (rating = 0) => {
+      let stars = "";
+      for (let i = 1; i <= 5; i++) {
+        if (rating >= i) {
+          stars += `<i class="fas fa-star star selected"></i>`;
+        } else if (rating >= i - 0.5) {
+          stars += `<i class="fas fa-star-half-alt star selected"></i>`;
+        } else {
+          stars += `<i class="far fa-star star"></i>`;
+        }
+      }
+      return stars;
+    };
+
+    const renderSongs = (songs) => {
+      songsGrid.innerHTML = "";
+      songs.forEach((song) => {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.innerHTML = `
+          <img src="${song.artwork}" alt="cover">
+          <div class="title">${song.title}</div>
+          <div class="artist">${song.artist}</div>
+          <div class="stars">${createStars(song.rating)}</div>
+        `;
+        songsGrid.appendChild(tile);
+      });
+    };
+
+    const renderAlbums = (albums) => {
+      albumsGrid.innerHTML = "";
+      albums.forEach((album) => {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.innerHTML = `
+          <img src="${album.artwork}" alt="cover">
+          <div class="title">${album.title}</div>
+          <div class="artist">${album.artist}</div>
+          <div class="stars">${createStars(album.rating)}</div>
+        `;
+        albumsGrid.appendChild(tile);
+      });
+    };
+
+    const searchUser = async () => {
+      const searchTerm = document.getElementById("searchInput").value.toLowerCase();
+      if (!searchTerm) return;
+
+      const allUsers = await getJSONData();
+      const foundUser = allUsers.find(u => u.Username.toLowerCase() === searchTerm);
+
+      if (foundUser) {
+        currentSearchedUser = foundUser;
+        document.getElementById("userHeader").textContent = `Viewing ${foundUser.Username}'s Profile`;
+        renderSongs(foundUser.selectedSongs || []);
+        renderAlbums(foundUser.selectedAlbums || []);
+      } else {
+        alert("User not found");
+        currentSearchedUser = null;
+        renderSongs([]);
+        renderAlbums([]);
+      }
+    };
+
+    const unfollowUser = async () => {
+      if (!currentSearchedUser) {
+        alert("Search for a user first!");
+        return;
+      }
+
+      const allUsers = await getJSONData();
+      const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+      const foundUser = currentSearchedUser;
+
+      if (!foundUser) {
+        alert("User not found!");
+        return;
+      }
+
+      if (!loggedInUser.following.includes(foundUser.Username)) {
+        alert(`You aren't following ${foundUser.Username}!`);
+        return;
+      }
+
+      // Remove the user from the following & followers arrays
+      loggedInUser.following = loggedInUser.following.filter(name => name !== foundUser.Username);
+      foundUser.followers = foundUser.followers.filter(name => name !== loggedInUser.Username);
+      loggedInUser.following_count -= 1;
+      foundUser.follower_count -= 1;
+
+      // Update both users
+      const userIndex = allUsers.findIndex(u => u.Username === loggedInUser.Username);
+      const foundUserIndex = allUsers.findIndex(u => u.Username === foundUser.Username);
+
+      if (userIndex !== -1) allUsers[userIndex] = loggedInUser;
+      if (foundUserIndex !== -1) allUsers[foundUserIndex] = foundUser;
+
+      await putJSONData(allUsers);
+      sessionStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+      alert(`You unfollowed ${foundUser.Username}!`);
+    };
+
+    const addFriend = async () => {
+      if (!currentSearchedUser) {
+        alert("Search for a user first!");
+        return;
+      }
+
+      const allUsers = await getJSONData();
+      const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+      const foundUser = currentSearchedUser;
+
+      if (loggedInUser.following.includes(foundUser.Username)) {
+        alert("You're already following this user!");
+        return;
+      }
+
+      loggedInUser.following.push(foundUser.Username);
+      foundUser.followers.push(loggedInUser.Username);
+      loggedInUser.following_count += 1;
+      foundUser.follower_count += 1;
+
+      const userIndex = allUsers.findIndex(u => u.Username === loggedInUser.Username);
+      const foundUserIndex = allUsers.findIndex(u => u.Username === foundUser.Username);
+
+      if (userIndex !== -1) allUsers[userIndex] = loggedInUser;
+      if (foundUserIndex !== -1) allUsers[foundUserIndex] = foundUser;
+
+      await putJSONData(allUsers);
+      sessionStorage.setItem("loggedInUser", JSON.stringify(loggedInUser));
+      alert(`You followed ${foundUser.Username}!`);
+    };
+
+    document.getElementById("addFriendsBtn").addEventListener("click", addFriend);
+    document.getElementById("searchBtn").addEventListener("click", searchUser);
+    document.getElementById("unfollowBtn").addEventListener("click", unfollowUser);
+  </script>
+
+</body>
+</html>

@@ -72,44 +72,67 @@
   <script src="getJSONData.js"></script>
   <script src="putJSONData.js"></script>
   <script>
-    async function signup() {
-      const username = document.getElementById('signupUsername').value;
-      const password = document.getElementById('signupPassword').value;
-      const email = document.getElementById('signupEmail').value;
-      const errorBox = document.getElementById('signupErrorMessage');
+  async function signup() {
+    const username = document.getElementById('signupUsername').value;
+    const password = document.getElementById('signupPassword').value;
+    const email = document.getElementById('signupEmail').value;
+    const errorBox = document.getElementById('signupErrorMessage');
 
-      try {
-        const data = await getJSONData();
-        const users = JSON.parse(data);
+    try {
+      const users = await getJSONData();
 
-        const userExists = users.some(user => user.Username === username);
-        if (userExists) {
-          errorBox.textContent = "Username already exists.";
-          errorBox.style.display = 'block';
-          return;
-        }
+      // 🔥 Debug: log out what's fetched
+      console.log("Fetched users data:", users);
+      console.log("Type of users:", typeof users);
+      console.log("Is array?", Array.isArray(users));
 
-        const newUser = {
-          Username: username,
-          Password: password,
-          Email: email,
-          role: "user",
-          selectedSongs: [],
-          selectedAlbums: []
-        };
-
-        users.push(newUser);
-        await putJSONData(users);
-
-        alert("Account created successfully!");
-        sessionStorage.setItem('loggedInUser', JSON.stringify(newUser));
-        window.location.href = 'songSearch.html';
-      } catch (err) {
-        console.error("Signup error:", err);
-        errorBox.textContent = "Something went wrong. Please try again.";
-        errorBox.style.display = 'block';
+      // ✅ Make sure we always get an array
+      let usersArray;
+      if (Array.isArray(users)) {
+        usersArray = users;
+      } else if (users.record && Array.isArray(users.record)) {
+        usersArray = users.record;
+      } else {
+        throw new Error("Fetched data is not a valid users array");
       }
+
+      // 🔍 Check if username exists
+      const userExists = usersArray.some(user => user.Username === username);
+      if (userExists) {
+        errorBox.textContent = "Username already exists.";
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      // ✅ New user object
+      const newUser = {
+        Username: username,
+        Password: password,
+        Email: email,
+        selectedSongs: [],
+        selectedAlbums: [],
+        followers: [],
+        following: [],
+        follower_count: 0,
+        following_count: 0
+      };
+
+      // ➕ Push and save
+      usersArray.push(newUser);
+      await putJSONData(usersArray);
+
+      alert("Account created successfully!");
+      sessionStorage.setItem('loggedInUser', JSON.stringify(newUser));
+      window.location.href = 'songSearch.html';
+    } catch (err) {
+      console.error("Signup error:", err);
+      errorBox.textContent = "Something went wrong. Please try again.";
+      errorBox.style.display = 'block';
     }
+  }
+
+
+
   </script>
 </body>
 </html>
